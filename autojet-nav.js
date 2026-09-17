@@ -347,7 +347,8 @@ function rowHTML(it, secondary) {
   const glyph = it.pdf ? (it.bold ? ICON.docSmallBold : ICON.docSmall) : (it.arrow && secondary ? ICON.arrow : '');
   const arrow = it.arrow && !secondary ? ICON.arrow : '';
   const attrs = `${secondary ? ' data-secondary' : ''}${it.bold ? ' data-bold' : ''}${it.arrow && secondary ? ' data-out' : ''}`;
-  return `<a class="row"${attrs} href="${esc(it.href)}">${glyph}${esc(it.label)}${arrow}</a>`;
+  const target = it.pdf ? ' target="_blank" rel="noopener"' : '';
+  return `<a class="row"${attrs} href="${esc(it.href)}"${target}>${glyph}${esc(it.label)}${arrow}</a>`;
 }
 
 function tileHTML(f, phone) {
@@ -386,11 +387,11 @@ function treeHTML(phone) {
     if (entry.type === 'mega') {
       groups = entry.columns.map(c =>
         `<p class="tlabel">${esc(c.heading)}</p>` +
-        c.items.map(it => `<a class="tlink"${it.bold ? ' data-bold' : ''} href="${esc(it.href)}">${it.pdf ? ICON.docSmall : ''}${esc(it.label)}</a>`).join('')
+        c.items.map(it => `<a class="tlink"${it.bold ? ' data-bold' : ''} href="${esc(it.href)}"${it.pdf ? ' target="_blank" rel="noopener"' : ''}>${it.pdf ? ICON.docSmall : ''}${esc(it.label)}</a>`).join('')
       ).join('');
     } else {
       groups = entry.items.map(it =>
-        `<a class="tlink" href="${esc(it.href)}">${it.pdf ? ICON.docSmall : ''}${esc(it.label)}${it.arrow ? ICON.arrow : ''}</a>`).join('');
+        `<a class="tlink" href="${esc(it.href)}"${it.pdf ? ' target="_blank" rel="noopener"' : ''}>${it.pdf ? ICON.docSmall : ''}${esc(it.label)}${it.arrow ? ICON.arrow : ''}</a>`).join('');
     }
 
     const tname = entry.noLink
