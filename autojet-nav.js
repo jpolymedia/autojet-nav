@@ -258,7 +258,7 @@ const CSS = `
 a{text-decoration:none;color:#333}
 button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 
-.bar{display:block;background:#1A1A1A;position:relative;z-index:2}
+.bar{display:block;background:#1A1A1A;position:relative;z-index:2;width:100vw;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw}
 .util-right{display:flex;align-items:center;gap:14px;flex:0 0 auto}
 .util-tel{display:flex;align-items:baseline;justify-content:center;gap:6px;flex:0 0 auto;width:140px;font-weight:700;font-size:20px;letter-spacing:.01em;color:#4DA8F0;white-space:nowrap}
 .util-tel svg{flex:0 0 auto}
@@ -290,7 +290,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .item[data-open] .chev svg{transform:rotate(180deg)}
 
 
-.field{display:flex;align-items:center;gap:8px;flex:0 0 auto;width:340px;height:36px;padding:0 16px;border:1px solid #C9CED4;border-radius:2px;background:#fff}
+.field{display:flex;align-items:center;gap:8px;flex:0 0 auto;width:248px;height:36px;padding:0 16px;border:1px solid #C9CED4;border-radius:2px;background:#fff}
 .field svg{flex:0 0 auto;order:2}
 .field input{order:1;font-size:14px}
 .field input::placeholder{color:#8A9099}
