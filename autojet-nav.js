@@ -429,12 +429,15 @@ class AutojetNav extends HTMLElement {
     this._teardown();
     this._phone = this.getAttribute('phone') || PHONE;
     this.shadowRoot.innerHTML = this._render();
-    this._wire();
-    clearInterval(this._statusTimer);
-    this._statusTimer = setInterval(() => {
-      const el = this.shadowRoot.querySelector('.util-right .status');
-      if (el) el.outerHTML = this._status();
-    }, 60000);
+
+    // Responsive breakpoint setup runs BEFORE _wire() and is wrapped separately
+    // from it on purpose. It used to run after _wire(), and when an unguarded
+    // selector in _wire() threw (see the fix in _wire() below), the exception
+    // aborted the rest of connectedCallback and this block never ran — silently
+    // disabling the mobile/desktop switch and the hamburger menu with no visible
+    // error unless the console was checked. Running this first, and wrapping
+    // _wire() in try/catch, means a future _wire() bug can degrade menu clicks
+    // without ever again taking down responsiveness with it.
     const breakpoint = parseInt(this.getAttribute('mobile-breakpoint'), 10) || 1300;
     this._sync = () => {
       const width = this.getBoundingClientRect().width;
@@ -445,11 +448,26 @@ class AutojetNav extends HTMLElement {
       this._ro = new ResizeObserver(() => this._sync());
       this._ro.observe(this);
     } else {
-      // very old browsers only: falls back to viewport width
+      // very old browsers only: falls back to viewport width via matchMedia
       this._mq = window.matchMedia(`(max-width:${breakpoint}px)`);
       this._mq.addEventListener('change', this._sync);
     }
+    // Backup signal alongside ResizeObserver: belt-and-suspenders in case a
+    // browser or embedding context ever delays or skips a resize-observer tick.
+    window.addEventListener('resize', this._sync);
     this._sync();
+
+    try {
+      this._wire();
+    } catch (err) {
+      console.error('autojet-nav: _wire() failed, menu interactions may be degraded', err);
+    }
+
+    clearInterval(this._statusTimer);
+    this._statusTimer = setInterval(() => {
+      const el = this.shadowRoot.querySelector('.util-right .status');
+      if (el) el.outerHTML = this._status();
+    }, 60000);
   }
 
   disconnectedCallback() { clearInterval(this._statusTimer); this._teardown(); }
@@ -459,6 +477,7 @@ class AutojetNav extends HTMLElement {
     clearTimeout(this._leaveTimer);
     if (this._ro) this._ro.disconnect();
     if (this._mq && this._sync) this._mq.removeEventListener('change', this._sync);
+    if (this._sync) window.removeEventListener('resize', this._sync);
     if (this._onDocClick) document.removeEventListener('click', this._onDocClick, true);
     if (this._onKey) document.removeEventListener('keydown', this._onKey);
     this._ro = this._mq = this._sync = this._onDocClick = this._onKey = null;
@@ -610,7 +629,14 @@ class AutojetNav extends HTMLElement {
         if (this._open === label) this._closeMenu(); else this._openMenu(label);
       });
       chev.addEventListener('focus', () => this._openMenu(label));
-      wrap.querySelector('a').addEventListener('focus', () => this._openMenu(label));
+      // Resources has noLink: true, so its wrap holds a <span>, not an <a> — guard
+      // this instead of assuming every item wrap contains an anchor. Unguarded, this
+      // threw on that entry and aborted the rest of connectedCallback before it ever
+      // reached the responsive breakpoint setup below, which is what actually caused
+      // the "not responsive, no hamburger" bug (confirmed live: the whole sync/
+      // ResizeObserver setup never ran because this line crashed first).
+      const labelEl = wrap.querySelector('a');
+      if (labelEl) labelEl.addEventListener('focus', () => this._openMenu(label));
     });
 
     // leaving the whole header + panel region closes; re-entering cancels
