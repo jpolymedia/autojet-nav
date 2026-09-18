@@ -290,7 +290,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .item[data-open] .chev svg{transform:rotate(180deg)}
 
 
-.field{display:flex;align-items:center;gap:8px;flex:0 0 auto;width:266px;height:36px;padding:0 16px;border:1px solid #C9CED4;border-radius:2px;background:#fff}
+.field{display:flex;align-items:center;gap:8px;flex:0 0 auto;width:260px;height:36px;padding:0 16px;border:1px solid #C9CED4;border-radius:2px;background:#fff}
 .field svg{flex:0 0 auto;order:2}
 .field input{order:1;font-size:14px}
 .field input::placeholder{color:#8A9099}
