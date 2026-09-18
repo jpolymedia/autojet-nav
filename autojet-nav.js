@@ -4,17 +4,17 @@
  * compact-breakpoint, mobile-breakpoint
  *
  * TWO-TIER RESPONSIVE COLLAPSE. The bottom row (nav items + hours status +
- * phone) and the top row's search field do not drop to the hamburger menu
- * all at once. There are two independent width thresholds:
+ * phone) does not drop to the hamburger menu all at once. There are two
+ * independent width thresholds:
  *
  * 1. compact-breakpoint (default 1260) is the point where the FULL bottom
  *    row (items + hours/status + phone) stops fitting. Below this width the
  *    component adds [data-compact]: the "Open Now / Closes 5 PM CT" status
- *    text hides (the phone number itself stays put), and the top-bar search
- *    field collapses into a small search icon that opens the same field as
- *    a floating panel on click, closing on outside click or Escape. Nav
- *    items and the phone number stay visible in place through this whole
- *    tier — this buys room so the hamburger does not have to appear yet.
+ *    text hides (the phone number itself stays put). Nav items, the phone
+ *    number, and the top-bar search field all stay visible in place through
+ *    this whole tier — this buys room so the hamburger does not have to
+ *    appear yet. The search field has its own headroom at every width down
+ *    to the mobile tier and doesn't need to change here.
  *    Derivation: the 8 top-level items need ~660px unconstrained, the
  *    status+phone block is a fixed 404px, the row gap is 24px, and the
  *    wrap's side padding is clamp(24px, 6.25vw, 80px) per side. Solving
@@ -277,7 +277,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .logo{display:block;flex:0 0 auto;width:158px;color:#fff}
 .logo svg{display:block;width:100%;height:auto;padding-top:10px}
 .logo img{display:block;width:100%;height:auto}
-.tools{display:flex;align-items:center;gap:14px;flex:0 0 auto;position:relative}
+.tools{display:flex;align-items:center;gap:14px;flex:0 0 auto}
 .rule{display:none}
 
 .items{display:flex;align-items:center;gap:22px;height:100%;flex:0 1 auto;min-width:0}
@@ -290,14 +290,12 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .item[data-open] .chev svg{transform:rotate(180deg)}
 
 
-.field{display:flex;align-items:center;gap:8px;flex:0 0 auto;width:300px;height:36px;padding:0 16px;border:1px solid #C9CED4;border-radius:2px;background:#fff}
+.field{display:flex;align-items:center;gap:8px;flex:0 0 auto;width:270px;height:36px;padding:0 16px;border:1px solid #C9CED4;border-radius:2px;background:#fff}
 .field svg{flex:0 0 auto;order:2}
 .field input{order:1;font-size:14px}
 .field input::placeholder{color:#8A9099}
 .field input{border:0;outline:0;width:100%;font:400 14px/1 'Wix Madefor Text',sans-serif;color:#333;background:none}
 .field input::placeholder{color:#8A9099}
-.search-toggle{display:none;align-items:center;justify-content:center;width:36px;height:36px;flex:0 0 auto;color:#fff}
-.search-toggle:hover{color:#4DA8F0}
 .quote{display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:140px;height:36px;background:#FBBF13;border-radius:2px;font-family:'Wix Madefor Text',sans-serif;font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:#1A1A1A}
 .quote:hover{background:#e6ad0c;color:#1A1A1A}
 
@@ -374,11 +372,8 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .sheet-foot .tel svg{display:none}
 
 :host([data-compact]) .util-right .status{display:none}
-:host([data-compact]) .tools .field{display:none}
-:host([data-compact]) .search-toggle{display:flex}
-:host([data-compact][data-search-open]) .tools .field{display:flex;position:absolute;top:calc(100% + 10px);right:0;width:280px;z-index:5;box-shadow:0 10px 18px -12px rgba(0,0,0,.3)}
 
-:host([data-mobile]) .items,:host([data-mobile]) .quote,:host([data-mobile]) .field,:host([data-mobile]) .search-toggle{display:none}
+:host([data-mobile]) .items,:host([data-mobile]) .quote,:host([data-mobile]) .field{display:none}
 :host([data-mobile]) .burger{display:flex}
 
 
@@ -488,10 +483,9 @@ class AutojetNav extends HTMLElement {
         // true hamburger tier: items + phone alone don't fit either
         this.setAttribute('data-mobile', '');
         this.removeAttribute('data-compact');
-        this._closeSearch();
       } else if (width > 0 && width <= compactBreakpoint) {
-        // compact tier: drop the hours/status text and collapse search to
-        // an icon first, before ever reaching for the hamburger
+        // compact tier: drop the hours/status text first, before ever
+        // reaching for the hamburger
         this.removeAttribute('data-mobile');
         this.setAttribute('data-compact', '');
         this._closeSheet();
@@ -499,7 +493,6 @@ class AutojetNav extends HTMLElement {
         this.removeAttribute('data-mobile');
         this.removeAttribute('data-compact');
         this._closeSheet();
-        this._closeSearch();
       }
     };
     if (typeof ResizeObserver !== 'undefined') {
@@ -607,7 +600,6 @@ class AutojetNav extends HTMLElement {
           ${this._logo()}
           <div class="tools">
             <form class="field" data-bar-search>${ICON.searchGray}<input type="search" placeholder="Search by Part, OE, or Model" aria-label="Search by Part, OE, or Model"></form>
-            <button class="search-toggle" type="button" data-search-toggle aria-label="Open search" aria-expanded="false">${ICON.searchWhite}</button>
             <a class="quote" href="${esc(this.getAttribute('quote-href') || '#')}">Get Quote</a>
           </div>
           <button class="burger" type="button" data-burger aria-label="Open menu" aria-expanded="false">${ICON.burger}</button>
@@ -714,26 +706,14 @@ class AutojetNav extends HTMLElement {
       if (e.key !== 'Escape') return;
       this._closeMenu();
       this._closeSheet();
-      this._closeSearch();
     };
     document.addEventListener('keydown', this._onKey);
 
     this._onDocClick = e => {
       if (e.composedPath().includes(this)) return;
       this._closeMenu();
-      this._closeSearch();
     };
     document.addEventListener('click', this._onDocClick, true);
-
-    // compact-tier search toggle: opens/closes the floating search field
-    const searchToggle = root.querySelector('[data-search-toggle]');
-    if (searchToggle) {
-      searchToggle.addEventListener('click', e => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (this.hasAttribute('data-search-open')) this._closeSearch(); else this._openSearch();
-      });
-    }
 
     // mobile sheet
     root.querySelector('[data-burger]').addEventListener('click', () => this._openSheet());
@@ -787,22 +767,6 @@ class AutojetNav extends HTMLElement {
     else sheet.removeAttribute('open');
     this.shadowRoot.querySelector('[data-burger]').setAttribute('aria-expanded', 'false');
     document.documentElement.style.overflow = '';
-  }
-
-  /* ----- compact-tier search: floating field opened from the icon toggle ----- */
-
-  _openSearch() {
-    this.setAttribute('data-search-open', '');
-    const toggle = this.shadowRoot && this.shadowRoot.querySelector('[data-search-toggle]');
-    if (toggle) toggle.setAttribute('aria-expanded', 'true');
-    const input = this.shadowRoot && this.shadowRoot.querySelector('.tools .field input');
-    if (input) input.focus();
-  }
-
-  _closeSearch() {
-    this.removeAttribute('data-search-open');
-    const toggle = this.shadowRoot && this.shadowRoot.querySelector('[data-search-toggle]');
-    if (toggle) toggle.setAttribute('aria-expanded', 'false');
   }
 }
 
