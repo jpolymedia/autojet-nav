@@ -3,6 +3,16 @@
  * Attributes: logo-src, logo-href, phone, quote-href, search-action, mobile-breakpoint
  * The desktop row needs ~1290px to fit, so mobile-breakpoint defaults to 1300.
  *
+ * RESPONSIVE MEASUREMENT: the mobile/desktop switch watches this element's own
+ * rendered width (ResizeObserver on `this`), not window.innerWidth. Inside Wix,
+ * this component's box can be narrower than the browser viewport (a fixed-width
+ * widget setting, a non-stretched container, editor-side scaling) and a
+ * viewport-based matchMedia will report "desktop" even when the box itself has
+ * no room for the desktop row, which is what caused the overlap/no-hamburger
+ * bug. If the widget's box still doesn't reach full browser width even on a
+ * wide screen, that's a Wix Editor layout setting (width set to "Stretch"/
+ * "Full Width", not a fixed pixel width), not something this file controls.
+ *
  * EDIT THE NAV ARRAY BELOW. Desktop panels and the mobile accordion both read it,
  * so every label and URL is maintained in exactly one place.
  * Replace every "#" with the real destination before go-live.
@@ -245,7 +255,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .item[data-open] .chev svg{transform:rotate(180deg)}
 
 
-.field{display:flex;align-items:center;gap:8px;flex:0 0 auto;width:250px;height:36px;padding:0 16px;border:1px solid #C9CED4;border-radius:2px;background:#fff}
+.field{display:flex;align-items:center;gap:8px;flex:0 0 auto;width:300px;height:36px;padding:0 16px;border:1px solid #C9CED4;border-radius:2px;background:#fff}
 .field svg{flex:0 0 auto;order:2}
 .field input{order:1;font-size:14px}
 .field input::placeholder{color:#8A9099}
@@ -425,12 +435,20 @@ class AutojetNav extends HTMLElement {
       const el = this.shadowRoot.querySelector('.util-right .status');
       if (el) el.outerHTML = this._status();
     }, 60000);
-    this._mq = window.matchMedia(`(max-width:${this.getAttribute('mobile-breakpoint') || 1300}px)`);
+    const breakpoint = parseInt(this.getAttribute('mobile-breakpoint'), 10) || 1300;
     this._sync = () => {
-      if (this._mq.matches) this.setAttribute('data-mobile', '');
+      const width = this.getBoundingClientRect().width;
+      if (width > 0 && width <= breakpoint) this.setAttribute('data-mobile', '');
       else { this.removeAttribute('data-mobile'); this._closeSheet(); }
     };
-    this._mq.addEventListener('change', this._sync);
+    if (typeof ResizeObserver !== 'undefined') {
+      this._ro = new ResizeObserver(() => this._sync());
+      this._ro.observe(this);
+    } else {
+      // very old browsers only: falls back to viewport width
+      this._mq = window.matchMedia(`(max-width:${breakpoint}px)`);
+      this._mq.addEventListener('change', this._sync);
+    }
     this._sync();
   }
 
@@ -439,10 +457,11 @@ class AutojetNav extends HTMLElement {
   _teardown() {
     clearTimeout(this._hoverTimer);
     clearTimeout(this._leaveTimer);
+    if (this._ro) this._ro.disconnect();
     if (this._mq && this._sync) this._mq.removeEventListener('change', this._sync);
     if (this._onDocClick) document.removeEventListener('click', this._onDocClick, true);
     if (this._onKey) document.removeEventListener('keydown', this._onKey);
-    this._mq = this._sync = this._onDocClick = this._onKey = null;
+    this._ro = this._mq = this._sync = this._onDocClick = this._onKey = null;
     this._open = null;
   }
 
