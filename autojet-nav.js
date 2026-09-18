@@ -270,12 +270,12 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .status .until{font-weight:400;font-size:14px;color:#B4BAC2}
 .status[data-closed] .dot{background:#8A9099}
 .status[data-closed] .state{color:#B4BAC2}
-.bar-top{display:flex;height:69px;padding-top:6px;box-sizing:border-box}
+.bar-top{display:flex;height:69px;box-sizing:border-box}
 .bar-btm{display:flex;height:50px;padding-bottom:4px;border-top:1px solid rgba(255,255,255,.22);border-bottom:3px solid #4DA8F0;box-sizing:border-box}
 .wrap{display:flex;align-items:center;justify-content:space-between;gap:40px;width:100%;max-width:1600px;margin:0 auto;padding:0 clamp(24px, 6.25vw, 80px);box-sizing:border-box}
 .bar-btm .wrap{position:relative;gap:24px}
 .logo{display:block;flex:0 0 auto;width:158px;color:#fff}
-.logo svg{display:block;width:100%;height:auto;padding-top:10px}
+.logo svg{display:block;width:100%;height:auto}
 .logo img{display:block;width:100%;height:auto}
 .tools{display:flex;align-items:center;gap:14px;flex:0 0 auto}
 .rule{display:none}
@@ -290,7 +290,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .item[data-open] .chev svg{transform:rotate(180deg)}
 
 
-.field{display:flex;align-items:center;gap:8px;flex:0 0 auto;width:270px;height:36px;padding:0 16px;border:1px solid #C9CED4;border-radius:2px;background:#fff}
+.field{display:flex;align-items:center;gap:8px;flex:0 0 auto;width:340px;height:36px;padding:0 16px;border:1px solid #C9CED4;border-radius:2px;background:#fff}
 .field svg{flex:0 0 auto;order:2}
 .field input{order:1;font-size:14px}
 .field input::placeholder{color:#8A9099}
@@ -344,7 +344,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .sheet{display:none;position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#fff;color:#333;z-index:9999;flex-direction:column;overscroll-behavior:contain}
 .sheet[open]{display:flex}
 .sheet::backdrop{background:#fff}
-.sheet-bar{display:flex;align-items:center;justify-content:space-between;height:72px;padding:6px 20px 0;background:#1A1A1A;flex:0 0 auto}
+.sheet-bar{display:flex;align-items:center;justify-content:space-between;height:72px;padding:0 20px;background:#1A1A1A;flex:0 0 auto}
 .sheet-bar .logo{width:132px}
 .sheet-x{color:#fff}
 .sheet-x{display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin-right:-10px}
@@ -373,7 +373,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 
 :host([data-compact]) .util-right .status{display:none}
 
-:host([data-mobile]) .items,:host([data-mobile]) .quote,:host([data-mobile]) .field{display:none}
+:host([data-mobile]) .items,:host([data-mobile]) .bar-top .quote,:host([data-mobile]) .bar-top .field{display:none}
 :host([data-mobile]) .burger{display:flex}
 
 
