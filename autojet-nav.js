@@ -1,7 +1,7 @@
 /* Auto-jet navigation — Wix Studio Custom Element
  * Tag: <autojet-nav>
  * Attributes: logo-src, logo-href, phone, quote-href, search-action, mobile-breakpoint
- * The desktop row needs ~1290px to fit, so mobile-breakpoint defaults to 1024.
+ * The desktop row needs ~1290px to fit, so mobile-breakpoint defaults to 1300.
  *
  * EDIT THE NAV ARRAY BELOW. Desktop panels and the mobile accordion both read it,
  * so every label and URL is maintained in exactly one place.
@@ -425,7 +425,7 @@ class AutojetNav extends HTMLElement {
       const el = this.shadowRoot.querySelector('.util-right .status');
       if (el) el.outerHTML = this._status();
     }, 60000);
-    this._mq = window.matchMedia(`(max-width:${this.getAttribute('mobile-breakpoint') || 1024}px)`);
+    this._mq = window.matchMedia(`(max-width:${this.getAttribute('mobile-breakpoint') || 1300}px)`);
     this._sync = () => {
       if (this._mq.matches) this.setAttribute('data-mobile', '');
       else { this.removeAttribute('data-mobile'); this._closeSheet(); }
