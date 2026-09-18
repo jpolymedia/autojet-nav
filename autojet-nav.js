@@ -24,8 +24,12 @@
  * 2. mobile-breakpoint (default 960) is the point where items + phone ALONE
  *    (status already hidden by the compact tier) still do not fit. Only
  *    below this width does the component switch to the hamburger: items,
- *    the quote button, and the search affordance all move into the mobile
- *    sheet, and the whole bottom row hides.
+ *    the quote button, and the full search field all move into the mobile
+ *    sheet, and the whole bottom row hides. The top bar keeps a small
+ *    search icon (.search-mobile) next to the burger at this tier — it
+ *    doesn't duplicate the field, it just opens the sheet with the sheet's
+ *    own search field focused, so search is never more than one tap away
+ *    even when collapsed.
  *    Derivation: 660 (items) + 24 (gap) + 140 (phone block alone, no
  *    status) + 2*(0.0625*width) = width gives ~942px; 960 adds a small
  *    buffer.
@@ -340,6 +344,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .cta:hover{background:#045a96;color:#fff}
 
 /* mobile */
+.search-mobile{display:none;align-items:center;justify-content:center;width:44px;height:44px;color:#fff;flex:0 0 auto}
 .burger{display:none;align-items:center;justify-content:center;width:44px;height:44px;color:#fff;margin-right:-8px}
 .sheet{display:none;position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#fff;color:#333;z-index:9999;flex-direction:column;overscroll-behavior:contain}
 .sheet[open]{display:flex}
@@ -375,6 +380,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 
 :host([data-mobile]) .items,:host([data-mobile]) .bar-top .quote,:host([data-mobile]) .bar-top .field{display:none}
 :host([data-mobile]) .burger{display:flex}
+:host([data-mobile]) .search-mobile{display:flex}
 
 
 :host([data-mobile]) .bar-top{height:66px}
@@ -601,6 +607,7 @@ class AutojetNav extends HTMLElement {
           <div class="tools">
             <form class="field" data-bar-search>${ICON.searchGray}<input type="search" placeholder="Search by Part, OE, or Model" aria-label="Search by Part, OE, or Model"></form>
             <a class="quote" href="${esc(this.getAttribute('quote-href') || '#')}">Get Quote</a>
+            <button class="search-mobile" type="button" data-search-mobile aria-label="Search">${ICON.searchWhite}</button>
           </div>
           <button class="burger" type="button" data-burger aria-label="Open menu" aria-expanded="false">${ICON.burger}</button>
         </div>
@@ -718,6 +725,13 @@ class AutojetNav extends HTMLElement {
     // mobile sheet
     root.querySelector('[data-burger]').addEventListener('click', () => this._openSheet());
     root.querySelector('[data-close]').addEventListener('click', () => this._closeSheet());
+    // top-bar search icon in the mobile tier opens straight to the sheet's
+    // search field rather than duplicating the field/logic in the collapsed bar
+    root.querySelector('[data-search-mobile]').addEventListener('click', () => {
+      this._openSheet();
+      const input = root.querySelector('.sheet-search input');
+      if (input) input.focus();
+    });
     const sheetEl = root.querySelector('[data-sheet]');
     sheetEl.addEventListener('close', () => {
       root.querySelector('[data-burger]').setAttribute('aria-expanded', 'false');
