@@ -1,27 +1,51 @@
 /* Auto-jet navigation — Wix Studio Custom Element
  * Tag: <autojet-nav>
- * Attributes: logo-src, logo-href, phone, quote-href, search-action, mobile-breakpoint
- * mobile-breakpoint defaults to 1260, derived from the desktop row's actual
- * content, not a round guess: the 8 top-level items need ~660px unconstrained,
- * the status+phone block is a fixed 404px, the row gap between them is 24px,
- * and the wrap's own side padding is clamp(24px, 6.25vw, 80px) on each side.
- * Solving width = 660 + 24 + 404 + 2*(0.0625*width) for width gives ~1244px as
- * the exact point content starts to overlap; 1260 adds a small buffer above
- * that. If the NAV array below changes (an item added/removed/renamed, or the
- * status/phone block's width changes), re-measure the real item row's width
- * (nav.shadowRoot.querySelector('.items').scrollWidth with data-mobile forced
- * off) and recompute — don't just nudge this number by feel, or it silently
- * drifts back to showing the hamburger later or earlier than the content
- * actually needs, which is the bug this replaced.
+ * Attributes: logo-src, logo-href, phone, quote-href, search-action,
+ * compact-breakpoint, mobile-breakpoint
  *
- * RESPONSIVE MEASUREMENT: the mobile/desktop switch watches this element's own
- * rendered width (ResizeObserver on `this`), not window.innerWidth. Inside Wix,
- * this component's box can be narrower than the browser viewport (a fixed-width
- * widget setting, a non-stretched container, editor-side scaling) and a
- * viewport-based matchMedia will report "desktop" even when the box itself has
- * no room for the desktop row, which is what caused the overlap/no-hamburger
- * bug. If the widget's box still doesn't reach full browser width even on a
- * wide screen, that's a Wix Editor layout setting (width set to "Stretch"/
+ * TWO-TIER RESPONSIVE COLLAPSE. The bottom row (nav items + hours status +
+ * phone) and the top row's search field do not drop to the hamburger menu
+ * all at once. There are two independent width thresholds:
+ *
+ * 1. compact-breakpoint (default 1260) is the point where the FULL bottom
+ *    row (items + hours/status + phone) stops fitting. Below this width the
+ *    component adds [data-compact]: the "Open Now / Closes 5 PM CT" status
+ *    text hides (the phone number itself stays put), and the top-bar search
+ *    field collapses into a small search icon that opens the same field as
+ *    a floating panel on click, closing on outside click or Escape. Nav
+ *    items and the phone number stay visible in place through this whole
+ *    tier — this buys room so the hamburger does not have to appear yet.
+ *    Derivation: the 8 top-level items need ~660px unconstrained, the
+ *    status+phone block is a fixed 404px, the row gap is 24px, and the
+ *    wrap's side padding is clamp(24px, 6.25vw, 80px) per side. Solving
+ *    width = 660 + 24 + 404 + 2*(0.0625*width) gives ~1244px as the exact
+ *    overlap point; 1260 adds a small buffer.
+ *
+ * 2. mobile-breakpoint (default 960) is the point where items + phone ALONE
+ *    (status already hidden by the compact tier) still do not fit. Only
+ *    below this width does the component switch to the hamburger: items,
+ *    the quote button, and the search affordance all move into the mobile
+ *    sheet, and the whole bottom row hides.
+ *    Derivation: 660 (items) + 24 (gap) + 140 (phone block alone, no
+ *    status) + 2*(0.0625*width) = width gives ~942px; 960 adds a small
+ *    buffer.
+ *
+ * If the NAV array below changes (an item added/removed/renamed), or the
+ * phone/status block widths change, re-measure the real item row's width
+ * (nav.shadowRoot.querySelector('.items').scrollWidth with data-mobile and
+ * data-compact forced off) and recompute BOTH thresholds — don't just nudge
+ * these numbers by feel, or the tiers drift out of sync with what the
+ * content actually needs, which is the bug this replaced.
+ *
+ * RESPONSIVE MEASUREMENT: the mobile/compact/desktop switch watches this
+ * element's own rendered width (ResizeObserver on `this`), not
+ * window.innerWidth, with a window resize listener as a backup signal.
+ * Inside Wix, this component's box can be narrower than the browser
+ * viewport (a fixed-width widget setting, a non-stretched container,
+ * editor-side scaling) and a viewport-based matchMedia will report
+ * "desktop" even when the box itself has no room for the desktop row. If
+ * the widget's box still doesn't reach full browser width even on a wide
+ * screen, that's a Wix Editor layout setting (width set to "Stretch"/
  * "Full Width", not a fixed pixel width), not something this file controls.
  *
  * EDIT THE NAV ARRAY BELOW. Desktop panels and the mobile accordion both read it,
@@ -253,7 +277,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .logo{display:block;flex:0 0 auto;width:158px;color:#fff}
 .logo svg{display:block;width:100%;height:auto;padding-top:10px}
 .logo img{display:block;width:100%;height:auto}
-.tools{display:flex;align-items:center;gap:14px;flex:0 0 auto}
+.tools{display:flex;align-items:center;gap:14px;flex:0 0 auto;position:relative}
 .rule{display:none}
 
 .items{display:flex;align-items:center;gap:22px;height:100%;flex:0 1 auto;min-width:0}
@@ -272,6 +296,8 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .field input::placeholder{color:#8A9099}
 .field input{border:0;outline:0;width:100%;font:400 14px/1 'Wix Madefor Text',sans-serif;color:#333;background:none}
 .field input::placeholder{color:#8A9099}
+.search-toggle{display:none;align-items:center;justify-content:center;width:36px;height:36px;flex:0 0 auto;color:#fff}
+.search-toggle:hover{color:#4DA8F0}
 .quote{display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:140px;height:36px;background:#FBBF13;border-radius:2px;font-family:'Wix Madefor Text',sans-serif;font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:#1A1A1A}
 .quote:hover{background:#e6ad0c;color:#1A1A1A}
 
@@ -347,7 +373,12 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .sheet-foot .tel a{font-size:20px;color:#056EB7}
 .sheet-foot .tel svg{display:none}
 
-:host([data-mobile]) .items,:host([data-mobile]) .quote,:host([data-mobile]) .field{display:none}
+:host([data-compact]) .util-right .status{display:none}
+:host([data-compact]) .tools .field{display:none}
+:host([data-compact]) .search-toggle{display:flex}
+:host([data-compact][data-search-open]) .tools .field{display:flex;position:absolute;top:calc(100% + 10px);right:0;width:280px;z-index:5;box-shadow:0 10px 18px -12px rgba(0,0,0,.3)}
+
+:host([data-mobile]) .items,:host([data-mobile]) .quote,:host([data-mobile]) .field,:host([data-mobile]) .search-toggle{display:none}
 :host([data-mobile]) .burger{display:flex}
 
 
@@ -449,18 +480,36 @@ class AutojetNav extends HTMLElement {
     // error unless the console was checked. Running this first, and wrapping
     // _wire() in try/catch, means a future _wire() bug can degrade menu clicks
     // without ever again taking down responsiveness with it.
-    const breakpoint = parseInt(this.getAttribute('mobile-breakpoint'), 10) || 1260;
+    const mobileBreakpoint = parseInt(this.getAttribute('mobile-breakpoint'), 10) || 960;
+    const compactBreakpoint = parseInt(this.getAttribute('compact-breakpoint'), 10) || 1260;
     this._sync = () => {
       const width = this.getBoundingClientRect().width;
-      if (width > 0 && width <= breakpoint) this.setAttribute('data-mobile', '');
-      else { this.removeAttribute('data-mobile'); this._closeSheet(); }
+      if (width > 0 && width <= mobileBreakpoint) {
+        // true hamburger tier: items + phone alone don't fit either
+        this.setAttribute('data-mobile', '');
+        this.removeAttribute('data-compact');
+        this._closeSearch();
+      } else if (width > 0 && width <= compactBreakpoint) {
+        // compact tier: drop the hours/status text and collapse search to
+        // an icon first, before ever reaching for the hamburger
+        this.removeAttribute('data-mobile');
+        this.setAttribute('data-compact', '');
+        this._closeSheet();
+      } else {
+        this.removeAttribute('data-mobile');
+        this.removeAttribute('data-compact');
+        this._closeSheet();
+        this._closeSearch();
+      }
     };
     if (typeof ResizeObserver !== 'undefined') {
       this._ro = new ResizeObserver(() => this._sync());
       this._ro.observe(this);
     } else {
-      // very old browsers only: falls back to viewport width via matchMedia
-      this._mq = window.matchMedia(`(max-width:${breakpoint}px)`);
+      // very old browsers only: falls back to viewport width via matchMedia,
+      // and only tracks the mobile tier since matchMedia can't watch two
+      // thresholds as cleanly as ResizeObserver can
+      this._mq = window.matchMedia(`(max-width:${mobileBreakpoint}px)`);
       this._mq.addEventListener('change', this._sync);
     }
     // Backup signal alongside ResizeObserver: belt-and-suspenders in case a
@@ -558,6 +607,7 @@ class AutojetNav extends HTMLElement {
           ${this._logo()}
           <div class="tools">
             <form class="field" data-bar-search>${ICON.searchGray}<input type="search" placeholder="Search by Part, OE, or Model" aria-label="Search by Part, OE, or Model"></form>
+            <button class="search-toggle" type="button" data-search-toggle aria-label="Open search" aria-expanded="false">${ICON.searchWhite}</button>
             <a class="quote" href="${esc(this.getAttribute('quote-href') || '#')}">Get Quote</a>
           </div>
           <button class="burger" type="button" data-burger aria-label="Open menu" aria-expanded="false">${ICON.burger}</button>
@@ -664,14 +714,26 @@ class AutojetNav extends HTMLElement {
       if (e.key !== 'Escape') return;
       this._closeMenu();
       this._closeSheet();
+      this._closeSearch();
     };
     document.addEventListener('keydown', this._onKey);
 
     this._onDocClick = e => {
       if (e.composedPath().includes(this)) return;
       this._closeMenu();
+      this._closeSearch();
     };
     document.addEventListener('click', this._onDocClick, true);
+
+    // compact-tier search toggle: opens/closes the floating search field
+    const searchToggle = root.querySelector('[data-search-toggle]');
+    if (searchToggle) {
+      searchToggle.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.hasAttribute('data-search-open')) this._closeSearch(); else this._openSearch();
+      });
+    }
 
     // mobile sheet
     root.querySelector('[data-burger]').addEventListener('click', () => this._openSheet());
@@ -725,6 +787,22 @@ class AutojetNav extends HTMLElement {
     else sheet.removeAttribute('open');
     this.shadowRoot.querySelector('[data-burger]').setAttribute('aria-expanded', 'false');
     document.documentElement.style.overflow = '';
+  }
+
+  /* ----- compact-tier search: floating field opened from the icon toggle ----- */
+
+  _openSearch() {
+    this.setAttribute('data-search-open', '');
+    const toggle = this.shadowRoot && this.shadowRoot.querySelector('[data-search-toggle]');
+    if (toggle) toggle.setAttribute('aria-expanded', 'true');
+    const input = this.shadowRoot && this.shadowRoot.querySelector('.tools .field input');
+    if (input) input.focus();
+  }
+
+  _closeSearch() {
+    this.removeAttribute('data-search-open');
+    const toggle = this.shadowRoot && this.shadowRoot.querySelector('[data-search-toggle]');
+    if (toggle) toggle.setAttribute('aria-expanded', 'false');
   }
 }
 
