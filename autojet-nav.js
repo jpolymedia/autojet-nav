@@ -98,11 +98,15 @@ const NAV = [
         heading: 'Parts by bus brand',
         items: [
           { label: 'Blue Bird', href: '/blue-bird-school-bus-exhaust-parts' },
-          { label: 'Chevrolet-GMC', href: 'https://www.auto-jet.com/_files/ugd/3978df_bf3f5d93eb0448f9a509b62589ec7830.pdf?index=true', pdf: true },
-          { label: 'Ford', href: 'https://www.auto-jet.com/_files/ugd/3978df_26970388efc04bba8c3c252909f97c0d.pdf?index=true', pdf: true },
+          // Chevrolet-GMC and Ford have no dedicated hub page; routed to /truck per
+          // the 2026-09-11 orphan-page redirect decision (same targets used there).
+          { label: 'Chevrolet-GMC', href: '/truck' },
+          { label: 'Ford', href: '/truck' },
           { label: 'Freightliner', href: '/freightliner-school-bus-exhaust-parts' },
           { label: 'IC Bus', href: '/ic-bus-school-bus-exhaust-parts' },
-          { label: 'Navistar International', href: 'https://www.auto-jet.com/_files/ugd/3978df_57f0cde034894b7a943d42cbd848ef28.pdf', pdf: true },
+          // Navistar/International has no dedicated hub page; routed to IC Bus,
+          // which runs the Navistar chassis (same target used in the 2026-09-11 redirect).
+          { label: 'Navistar International', href: '/ic-bus-school-bus-exhaust-parts' },
           { label: 'Thomas Built', href: '/thomas-built-school-bus-exhaust-parts' }
         ]
       },
@@ -146,24 +150,29 @@ const NAV = [
       {
         heading: 'Parts by truck brand',
         items: [
-          // no truck brand pages yet, so these rows serve the brand catalog PDFs
-          { label: 'Chevrolet-GMC', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_1199d42a933d44eca1c6d0098e7ddf6d.pdf', pdf: true },
-          { label: 'Ford', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_a2a9e1966089407896bcb941a8cd7320.pdf', pdf: true },
-          { label: 'Freightliner', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_33525896d14940349da522216a8e8536.pdf', pdf: true },
-          { label: 'Isuzu', href: '/parts?brand=Isuzu' },
-          { label: 'Navistar International', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_aff7fd91fee341e992c6bb99d53d2d4b.pdf', pdf: true }
+          // No truck brand pages exist yet, and /parts does not support a
+          // brand query-param filter (confirmed live: ?brand= is not read on
+          // load). Routed to /truck as an interim stopgap, not a PDF, until
+          // dedicated truck brand pages are built.
+          { label: 'Chevrolet-GMC', href: '/truck' },
+          { label: 'Ford', href: '/truck' },
+          { label: 'Freightliner', href: '/truck' },
+          { label: 'Isuzu', href: '/truck' },
+          { label: 'Navistar International', href: '/truck' }
         ]
       },
       {
         heading: 'Parts by system',
         items: [
-          // Truck has no vehicle-specific pages yet; these share the generic
-          // system pages until the truck versions ship.
+          // Truck has no vehicle-specific pages yet; DPF and Catalytic share
+          // the generic system pages until the truck versions ship. Performance
+          // Exhaust, Crossover Pipes, and Accessories have no pages at all yet,
+          // routed to /truck as an interim stopgap, not a PDF.
           { label: 'DPF and Emissions', href: '/dpf-and-emissions' },
           { label: 'Catalytic Converters and Mufflers', href: '/catalytic-converters-and-mufflers' },
-          { label: 'Performance Exhaust', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_1a36d6e3b86b4e5c847456bf19688c06.pdf', pdf: true },
-          { label: 'Crossover Pipes', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_3273b0cda0dc47caa0b91a58d58929dd.pdf', pdf: true },
-          { label: 'Accessories', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_872c682e617749b0870031c4fd48148a.pdf', pdf: true }
+          { label: 'Performance Exhaust', href: '/truck' },
+          { label: 'Crossover Pipes', href: '/truck' },
+          { label: 'Accessories', href: '/truck' }
         ]
       },
       {
