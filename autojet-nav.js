@@ -1,7 +1,18 @@
 /* Auto-jet navigation — Wix Studio Custom Element
  * Tag: <autojet-nav>
  * Attributes: logo-src, logo-href, phone, quote-href, search-action, mobile-breakpoint
- * The desktop row needs ~1290px to fit, so mobile-breakpoint defaults to 1300.
+ * mobile-breakpoint defaults to 1260, derived from the desktop row's actual
+ * content, not a round guess: the 8 top-level items need ~660px unconstrained,
+ * the status+phone block is a fixed 404px, the row gap between them is 24px,
+ * and the wrap's own side padding is clamp(24px, 6.25vw, 80px) on each side.
+ * Solving width = 660 + 24 + 404 + 2*(0.0625*width) for width gives ~1244px as
+ * the exact point content starts to overlap; 1260 adds a small buffer above
+ * that. If the NAV array below changes (an item added/removed/renamed, or the
+ * status/phone block's width changes), re-measure the real item row's width
+ * (nav.shadowRoot.querySelector('.items').scrollWidth with data-mobile forced
+ * off) and recompute — don't just nudge this number by feel, or it silently
+ * drifts back to showing the hamburger later or earlier than the content
+ * actually needs, which is the bug this replaced.
  *
  * RESPONSIVE MEASUREMENT: the mobile/desktop switch watches this element's own
  * rendered width (ResizeObserver on `this`), not window.innerWidth. Inside Wix,
@@ -438,7 +449,7 @@ class AutojetNav extends HTMLElement {
     // error unless the console was checked. Running this first, and wrapping
     // _wire() in try/catch, means a future _wire() bug can degrade menu clicks
     // without ever again taking down responsiveness with it.
-    const breakpoint = parseInt(this.getAttribute('mobile-breakpoint'), 10) || 1300;
+    const breakpoint = parseInt(this.getAttribute('mobile-breakpoint'), 10) || 1260;
     this._sync = () => {
       const width = this.getBoundingClientRect().width;
       if (width > 0 && width <= breakpoint) this.setAttribute('data-mobile', '');
