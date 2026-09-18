@@ -227,7 +227,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .status[data-closed] .state{color:#B4BAC2}
 .bar-top{display:flex;height:69px;padding-top:6px;box-sizing:border-box}
 .bar-btm{display:flex;height:50px;padding-bottom:4px;border-top:1px solid rgba(255,255,255,.22);border-bottom:3px solid #4DA8F0;box-sizing:border-box}
-.wrap{display:flex;align-items:center;justify-content:space-between;gap:40px;width:100%;max-width:1600px;margin:0 auto;padding:0 80px;box-sizing:border-box}
+.wrap{display:flex;align-items:center;justify-content:space-between;gap:40px;width:100%;max-width:1600px;margin:0 auto;padding:0 clamp(24px, 6.25vw, 80px);box-sizing:border-box}
 .bar-btm .wrap{position:relative;gap:24px}
 .logo{display:block;flex:0 0 auto;width:158px;color:#fff}
 .logo svg{display:block;width:100%;height:auto;padding-top:10px}
@@ -257,7 +257,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 /* panels */
 .panel{position:absolute;left:0;right:0;top:100%;background:#fff;box-shadow:0 10px 18px -12px rgba(0,0,0,.14);display:none;z-index:1}
 .panel[data-open]{display:block}
-.grid{display:grid;grid-template-columns:3fr 3fr 3fr 3.6fr;gap:40px;width:100%;max-width:1600px;margin:0 auto;padding:34px 80px 40px;box-sizing:border-box}
+.grid{display:grid;grid-template-columns:3fr 3fr 3fr 3.6fr;gap:40px;width:100%;max-width:1600px;margin:0 auto;padding:34px clamp(24px, 6.25vw, 80px) 40px;box-sizing:border-box}
 .grid[data-cols="3"]{grid-template-columns:3fr 3fr 3fr 3.6fr}
 .col{display:flex;flex-direction:column;gap:18px;min-width:0}
 .head{display:flex;flex-direction:column;gap:7px}
