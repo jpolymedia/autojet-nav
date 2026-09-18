@@ -1,47 +1,64 @@
 /* Auto-jet navigation — Wix Studio Custom Element
  * Tag: <autojet-nav>
- * Attributes: logo-src, logo-href, phone, quote-href, search-action
+ * Attributes: logo-src, logo-href, phone, quote-href, search-action,
+ * compact-breakpoint, mobile-breakpoint
  *
- * SINGLE HEADER, ALL WIDTHS. There is one header row at every screen size:
- * logo, search field, Get Quote button, hamburger. There is no separate
- * "desktop" row of nav items/hours/phone below it — every link, the Get
- * Quote button (duplicated for reachability), the phone number, and the
- * open/closed status all live in the hamburger sheet, opened by tapping the
- * burger. This replaces an earlier two-tier responsive system (a compact
- * tier that dropped the hours text, then a mobile tier that dropped to a
- * hamburger) — that system worked, but surfaced a real problem: the Wix
- * widget's own box does not reliably report the visitor's actual viewport
- * width (see RESPONSIVE MEASUREMENT below, still true), so the two-tier
- * breakpoints could not be trusted to fire at the right physical width. A
- * single fixed layout with no width-dependent branching sidesteps that
- * entirely — there is nothing for a bad width reading to get wrong.
+ * TWO-TIER RESPONSIVE COLLAPSE. The bottom row (nav items + hours status +
+ * phone) does not drop to the hamburger menu all at once. There are two
+ * independent width thresholds:
  *
- * The one place this still bends to width is the Get Quote button in the
- * top bar: below 560px (real phones, not the Wix-widget-width problem
- * above — an actual narrow device reliably reports its own width) it hides
- * and the search field takes the freed space, so logo + field + burger
- * never overflow a phone screen. Get Quote is never lost — it's always in
- * the sheet footer too.
+ * 1. compact-breakpoint (default 1260) is the point where the FULL bottom
+ *    row (items + hours/status + phone) stops fitting. Below this width the
+ *    component adds [data-compact]: the "Open Now / Closes 5 PM CT" status
+ *    text hides (the phone number itself stays put). Nav items, the phone
+ *    number, and the top-bar search field all stay visible in place through
+ *    this whole tier — this buys room so the hamburger does not have to
+ *    appear yet. The search field has its own headroom at every width down
+ *    to the mobile tier and doesn't need to change here.
+ *    Derivation: the 8 top-level items need ~660px unconstrained, the
+ *    status+phone block is a fixed 404px, the row gap is 24px, and the
+ *    wrap's side padding is clamp(24px, 6.25vw, 80px) per side. Solving
+ *    width = 660 + 24 + 404 + 2*(0.0625*width) gives ~1244px as the exact
+ *    overlap point; 1260 adds a small buffer.
  *
- * RESPONSIVE MEASUREMENT NOTE (kept from the old system, still relevant):
+ * 2. mobile-breakpoint (default 960) is the point where items + phone ALONE
+ *    (status already hidden by the compact tier) still do not fit. Only
+ *    below this width does the component switch to the hamburger: items,
+ *    the quote button, and the search affordance all move into the mobile
+ *    sheet, and the whole bottom row hides.
+ *    Derivation: 660 (items) + 24 (gap) + 140 (phone block alone, no
+ *    status) + 2*(0.0625*width) = width gives ~942px; 960 adds a small
+ *    buffer.
+ *
+ * If the NAV array below changes (an item added/removed/renamed), or the
+ * phone/status block widths change, re-measure the real item row's width
+ * (nav.shadowRoot.querySelector('.items').scrollWidth with data-mobile and
+ * data-compact forced off) and recompute BOTH thresholds — don't just nudge
+ * these numbers by feel, or the tiers drift out of sync with what the
+ * content actually needs, which is the bug this replaced.
+ *
+ * RESPONSIVE MEASUREMENT: the mobile/compact/desktop switch watches this
+ * element's own rendered width (ResizeObserver on `this`), not
+ * window.innerWidth, with a window resize listener as a backup signal.
  * Inside Wix, this component's box can be narrower than the browser
  * viewport (a fixed-width widget setting, a non-stretched container,
- * editor-side scaling). If the widget's box doesn't reach full browser
- * width even on a wide screen, that's a Wix Editor layout setting (width
- * set to "Stretch"/"Full Width", not a fixed pixel width), not something
- * this file controls.
+ * editor-side scaling) and a viewport-based matchMedia will report
+ * "desktop" even when the box itself has no room for the desktop row. If
+ * the widget's box still doesn't reach full browser width even on a wide
+ * screen, that's a Wix Editor layout setting (width set to "Stretch"/
+ * "Full Width", not a fixed pixel width), not something this file controls.
  *
- * EDIT THE NAV ARRAY BELOW. The mobile sheet's accordion reads it directly,
+ * EDIT THE NAV ARRAY BELOW. Desktop panels and the mobile accordion both read it,
  * so every label and URL is maintained in exactly one place.
  * Replace every "#" with the real destination before go-live.
  *
  * INFORMATION ARCHITECTURE (settled)
  * Vehicle categories stay top level: School Bus, Truck, Off-Road.
- * A category earns a mega/grouped entry when it has 2+ facets intrinsic to
- * itself, each with 3+ children, both used in one visit. School Bus and
- * Truck qualify (brand + system). Off-Road and Resources are single-facet.
+ * A category earns a mega menu when it has 2+ facets intrinsic to itself, each
+ * with 3+ children, both used in one visit. School Bus and Truck qualify
+ * (brand + system). Off-Road and Resources are single-facet dropdowns.
  * Catalog columns list every PDF for that vehicle, alphabetized, with the
- * complete catalog first.
+ * complete catalog first. Mobile lists the same rows.
  * Brand and catalog lists are alphabetized. System columns are ordered by demand
  * (DPF first, accessories last), because frequency beats spelling there.
  * Other exceptions: the complete catalog leads its column, Off-Road's catalog
@@ -54,17 +71,17 @@
  * Thomas, Freightliner. The brand and system columns and the catalog column all
  * derive from that list, so nav, catalog and PDFs never diverge.
  *
- * Both vehicle entries use the SAME three groups in the same order:
+ * Both vehicle panels use the SAME three columns in the same order:
  *   1 Parts by <vehicle> brand   2 Parts by system   3 Download PDF Catalogs
- * Brand links are bare brand names (the heading already says "brand"), and
- * no group carries an overview row: the parent nav item already goes there.
+ * Brand links are bare brand names (the heading already says "brand"), and each
+ * no column carries an overview row: the parent nav item already goes there.
  * PDF hosts differ by division on purpose: School Bus rows use the auto-jet.com
  * "School Bus Exhaust Parts" files, Truck rows the usrfiles truck imports.
  * Keep this parallel — a mechanic who learns one panel can read the other.
  *
  * Every top-level parent (School Bus, Truck, Off-Road, Resources) is a REAL link
- * to its own page: tapping the label navigates, only the chevron opens the
- * accordion group. Because the parent goes to the category page, the groups
+ * to its own page: clicking the label navigates, only the chevron opens the panel.
+ * Same split on mobile. Because the parent goes to the category page, the panels
  * carry no "…Parts Overview" row — it would duplicate the parent link.
  * Nothing in the nav is a redirect: set each href to its final destination.
  */
@@ -114,7 +131,13 @@ const NAV = [
           { label: 'Thomas Built', href: 'https://www.auto-jet.com/_files/ugd/3978df_d1256cdb76ef4885b34d5f3d49332a4c.pdf?index=true', pdf: true }
         ]
       }
-    ]
+    ],
+    featured: {
+      heading: 'Find your part',
+      placeholder: 'Search by Part, OE, or Model',
+      quoteLabel: 'Request a Quote',
+      quoteHref: '/contact'
+    }
   },
 
   {
@@ -160,7 +183,13 @@ const NAV = [
           { label: 'Vintage & Discontinued', href: '/vintage-and-discontinued', pdf: true }
         ]
       }
-    ]
+    ],
+    featured: {
+      heading: 'Find your part',
+      placeholder: 'Search by Part, OE, or Model',
+      quoteLabel: 'Request a Quote',
+      quoteHref: '/contact'
+    }
   },
 
   {
@@ -191,11 +220,15 @@ const NAV = [
 
 const ICON = {
   searchGray: '<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="#8A9099" stroke-width="1.6" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M12.8 12.8L17 17"/></svg>',
+  searchWhite: '<svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="#fff" stroke-width="1.8" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M12.8 12.8L17 17"/></svg>',
   docSmall: '<svg viewBox="0 0 128 128" width="15" height="15" aria-hidden="true"><rect width="128" height="128" rx="20" ry="20" fill="#056EB7"/><polygon points="82.17 65.39 82.17 21.51 45.83 21.51 45.83 65.4 16 65.4 64 112.49 112 65.39 82.17 65.39" fill="#fff"/></svg>',
+  docSmallBold: '<svg viewBox="0 0 128 128" width="16" height="16" aria-hidden="true"><rect width="128" height="128" rx="20" ry="20" fill="#056EB7"/><polygon points="82.17 65.39 82.17 21.51 45.83 21.51 45.83 65.4 16 65.4 64 112.49 112 65.39 82.17 65.39" fill="#fff"/></svg>',
+  phoneSm: '<svg viewBox="0 0 20 20" width="14" height="14" fill="#4DA8F0" aria-hidden="true"><path d="M6.6 2.2a1.4 1.4 0 011.9.5l1.4 2.5a1.4 1.4 0 01-.35 1.75l-1.2.95a9.3 9.3 0 003.8 3.8l.95-1.2a1.4 1.4 0 011.75-.35l2.5 1.4a1.4 1.4 0 01.5 1.9l-1 1.7a2 2 0 01-2.3.9A15.2 15.2 0 013.9 5.8a2 2 0 01.9-2.3l1.8-1.3z"/></svg>',
   phone: '<svg viewBox="0 0 20 20" width="15" height="15" fill="#056EB7" aria-hidden="true"><path d="M6.6 2.2a1.4 1.4 0 011.9.5l1.4 2.5a1.4 1.4 0 01-.35 1.75l-1.2.95a9.3 9.3 0 003.8 3.8l.95-1.2a1.4 1.4 0 011.75-.35l2.5 1.4a1.4 1.4 0 01.5 1.9l-1 1.7a2 2 0 01-2.3.9A15.2 15.2 0 013.9 5.8a2 2 0 01.9-2.3l1.8-1.3z"/></svg>',
   arrow: '<svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="#056EB7" stroke-width="1.6" aria-hidden="true"><path d="M2 7h9M7.5 3.5L11 7l-3.5 3.5"/></svg>',
+  chevron: '<svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M1.5 3.5L5 7 8.5 3.5"/></svg>',
   chevronM: '<svg viewBox="0 0 10 10" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M1.5 3.5L5 7 8.5 3.5"/></svg>',
-  burger: '<svg viewBox="0 0 20 20" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 5h16M2 10h16M2 15h16"/></svg>',
+  burger: '<svg viewBox="0 0 20 20" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 5h16M2 10h16M2 15h16"/></svg>',
   close: '<svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 3l14 14M17 3L3 17"/></svg>'
 };
 
@@ -226,39 +259,97 @@ a{text-decoration:none;color:#333}
 button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 
 .bar{display:block;background:#1A1A1A;position:relative;z-index:2}
-.bar-top{display:flex;align-items:center;height:72px;box-sizing:border-box}
-.wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;width:100%;max-width:1600px;margin:0 auto;padding:0 clamp(20px, 5vw, 80px);box-sizing:border-box}
+.util-right{display:flex;align-items:center;gap:14px;flex:0 0 auto}
+.util-tel{display:flex;align-items:baseline;justify-content:center;gap:6px;flex:0 0 auto;width:140px;font-weight:700;font-size:20px;letter-spacing:.01em;color:#4DA8F0;white-space:nowrap}
+.util-tel svg{flex:0 0 auto}
+.util-tel:hover{color:#fff}
+.util-tel:hover svg{fill:#fff}
+.status{display:flex;align-items:center;justify-content:center;gap:7px;flex:0 0 auto;width:250px}
+.status .dot{flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:#4ED07A}
+.status .state{font-weight:700;font-size:14px;color:#fff}
+.status .until{font-weight:400;font-size:14px;color:#B4BAC2}
+.status[data-closed] .dot{background:#8A9099}
+.status[data-closed] .state{color:#B4BAC2}
+.bar-top{display:flex;height:69px;box-sizing:border-box}
+.bar-btm{display:flex;height:50px;padding-bottom:4px;border-top:1px solid rgba(255,255,255,.22);border-bottom:3px solid #4DA8F0;box-sizing:border-box}
+.wrap{display:flex;align-items:center;justify-content:space-between;gap:40px;width:100%;max-width:1600px;margin:0 auto;padding:0 clamp(24px, 6.25vw, 80px);box-sizing:border-box}
+.bar-btm .wrap{position:relative;gap:24px}
 .logo{display:block;flex:0 0 auto;width:158px;color:#fff}
 .logo svg{display:block;width:100%;height:auto}
 .logo img{display:block;width:100%;height:auto}
-.tools{display:flex;align-items:center;gap:14px;flex:1 1 auto;justify-content:flex-end;min-width:0}
+.tools{display:flex;align-items:center;gap:14px;flex:0 0 auto}
+.rule{display:none}
 
-.field{display:flex;align-items:center;gap:8px;flex:0 1 340px;min-width:120px;height:36px;padding:0 16px;border:1px solid #C9CED4;border-radius:2px;background:#fff}
+.items{display:flex;align-items:center;gap:22px;height:100%;flex:0 1 auto;min-width:0}
+.item{position:relative;display:flex;align-items:center;gap:3px;height:100%;flex:0 0 auto;font-weight:400;font-size:14px;color:#fff;white-space:nowrap}
+.item>a{display:flex;align-items:center;height:100%;color:inherit}
+.item:hover,.item[data-open]{color:#4DA8F0}
+.item .chev{display:flex;align-items:center;justify-content:center;width:22px;height:100%;color:rgba(255,255,255,.5);cursor:pointer}
+.item:hover .chev,.item[data-open] .chev{color:#4DA8F0}
+.item .chev svg{transition:transform .12s ease}
+.item[data-open] .chev svg{transform:rotate(180deg)}
+
+
+.field{display:flex;align-items:center;gap:8px;flex:0 0 auto;width:340px;height:36px;padding:0 16px;border:1px solid #C9CED4;border-radius:2px;background:#fff}
 .field svg{flex:0 0 auto;order:2}
-.field input{order:1;font-size:14px;min-width:0}
+.field input{order:1;font-size:14px}
+.field input::placeholder{color:#8A9099}
 .field input{border:0;outline:0;width:100%;font:400 14px/1 'Wix Madefor Text',sans-serif;color:#333;background:none}
 .field input::placeholder{color:#8A9099}
 .quote{display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:140px;height:36px;background:#FBBF13;border-radius:2px;font-family:'Wix Madefor Text',sans-serif;font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:#1A1A1A}
 .quote:hover{background:#e6ad0c;color:#1A1A1A}
 
-.burger{display:flex;align-items:center;justify-content:center;width:52px;height:52px;color:#fff;flex:0 0 auto;margin-right:-10px}
+/* panels */
+.panel{position:absolute;left:0;right:0;top:100%;background:#fff;box-shadow:0 10px 18px -12px rgba(0,0,0,.14);display:none;z-index:1}
+.panel[data-open]{display:block}
+.grid{display:grid;grid-template-columns:3fr 3fr 3fr 3.6fr;gap:40px;width:100%;max-width:1600px;margin:0 auto;padding:34px clamp(24px, 6.25vw, 80px) 40px;box-sizing:border-box}
+.grid[data-cols="3"]{grid-template-columns:3fr 3fr 3fr 3.6fr}
+.col{display:flex;flex-direction:column;gap:18px;min-width:0}
+.head{display:flex;flex-direction:column;gap:7px}
+.head-row{display:flex;align-items:center;gap:8px}
+.head-row span{font-weight:700;font-size:14px;line-height:1.2;letter-spacing:.08em;text-transform:uppercase;color:#056EB7}
+.head .rule{width:24px;height:2px}
+.rows{display:flex;flex-direction:column;gap:8px}
+.rows[data-secondary]{gap:8px}
+.row{display:flex;align-items:center;gap:9px;min-height:22px;font-size:15px;line-height:1.35;white-space:nowrap;color:#333}
+.row:hover{color:#056EB7}
+.row[data-secondary]{font-size:13.5px;color:#4A4F55}
+.row[data-secondary][data-out]{color:#056EB7;font-weight:600}
+.row[data-bold]{font-weight:700;color:#333}
+.row[data-secondary][data-bold]{font-size:14px}
+.row svg{flex:0 0 auto}
 
-/* below real-phone widths, drop Get Quote from the top bar (it's always in
-   the sheet footer too) so logo + field + burger never overflow */
-@media (max-width:560px){
-  .quote{display:none}
-}
+/* dropdown */
+.dd{position:absolute;top:calc(100% + 7px);left:0;background:#fff;box-shadow:0 10px 18px -12px rgba(0,0,0,.14);padding:18px 20px;display:none;z-index:1}
+.dd[data-open]{display:block}
+.dd .rows{gap:8px}
 
-/* mobile sheet — the only navigation surface at every width: items, Get
-   Quote, phone and open/closed status all live here */
+/* featured tile */
+.tile{background:#F4F6F8;padding:20px}
+.tile .head{margin-bottom:14px}
+.tile .shot{display:flex;align-items:center;justify-content:center;height:104px;background:#E9ECEF;border:1px solid #DFE3E7;font-size:11px;color:#5A6069;margin-bottom:18px}
+.tile .field{width:100%;margin-bottom:18px}
+.tile .go{display:flex;align-items:center;justify-content:center;width:46px;height:42px;background:#056EB7;border-radius:0 2px 2px 0}
+.tile .go:hover{background:#045a96}
+.tel{display:flex;align-items:baseline;gap:8px;margin-bottom:18px}
+.tel svg{flex:0 0 auto}
+.tel a{flex:0 0 auto;font-weight:700;font-size:20px;line-height:1.1;color:#333}
+.tel a:hover{color:#056EB7}
+.callus{font-size:13px;line-height:1.1;color:#5A6069;white-space:nowrap}
+.cta{display:flex;align-items:center;justify-content:center;height:44px;background:#056EB7;border-radius:2px;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#fff}
+.cta:hover{background:#045a96;color:#fff}
+
+/* mobile */
+.burger{display:none;align-items:center;justify-content:center;width:44px;height:44px;color:#fff;margin-right:-8px}
 .sheet{display:none;position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#fff;color:#333;z-index:9999;flex-direction:column;overscroll-behavior:contain}
 .sheet[open]{display:flex}
 .sheet::backdrop{background:#fff}
 .sheet-bar{display:flex;align-items:center;justify-content:space-between;height:72px;padding:0 20px;background:#1A1A1A;flex:0 0 auto}
 .sheet-bar .logo{width:132px}
-.sheet-x{display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin-right:-10px;color:#fff}
+.sheet-x{color:#fff}
+.sheet-x{display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin-right:-10px}
 .sheet-search{padding:16px 20px;flex:0 0 auto}
-.sheet-search .field{width:100%;max-width:none;flex:1 1 auto;height:46px}
+.sheet-search .field{width:100%;max-width:none;height:46px}
 .sheet-search input{font-size:14px}
 .tree{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;border-top:1px solid #EDEFF2}
 .trow{display:flex;align-items:center;justify-content:space-between;width:100%;height:52px;padding:0 20px;border-bottom:1px solid #EDEFF2;font-weight:400;font-size:14px;color:#333;text-align:left}
@@ -276,27 +367,65 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .tlink[data-bold]{font-weight:700}
 .sheet-foot{flex:0 0 auto;padding:20px 20px 24px}
 .sheet-foot .quote{width:100%;justify-content:center;height:50px;font-size:14px}
-.sheet-foot .status{display:flex;align-items:center;justify-content:center;gap:7px;margin:16px 0 0}
-.sheet-foot .status .dot{flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:#1E9E52}
-.sheet-foot .status .state{font-weight:700;font-size:13px;color:#333}
-.sheet-foot .status .until{font-weight:400;font-size:13px;color:#5A6069}
-.sheet-foot .status[data-closed] .dot{background:#8A9099}
-.sheet-foot .status[data-closed] .state{color:#5A6069}
-.sheet-foot .tel{align-items:center;justify-content:center;margin:8px 0 0}
+.sheet-foot .tel{align-items:center;justify-content:center;margin:16px 0 0}
 .sheet-foot .tel a{font-size:20px;color:#056EB7}
 .sheet-foot .tel svg{display:none}
-.tel{display:flex;align-items:baseline;gap:8px}
-.tel a{flex:0 0 auto;font-weight:700;font-size:20px;line-height:1.1;color:#333}
-.tel a:hover{color:#056EB7}
+
+:host([data-compact]) .util-right .status{display:none}
+
+:host([data-mobile]) .items,:host([data-mobile]) .bar-top .quote,:host([data-mobile]) .bar-top .field{display:none}
+:host([data-mobile]) .burger{display:flex}
+
+
+:host([data-mobile]) .bar-top{height:66px}
+:host([data-mobile]) .wrap{padding:0 20px}
+:host([data-mobile]) .bar-btm{display:none}
+:host([data-mobile]) .logo{width:132px}
 `;
 
 /* ---------------------------------------------------------------- markup */
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-/* Mobile sheet mirrors the old desktop panels exactly: the same groups in the
- * same order with the same rows, stacked in an accordion. Catalog rows carry
- * the document glyph. This is the ONLY place nav items render now. */
+/* PDF rows are marked by the document glyph in front of the label, so every row in
+ * a catalogs column starts at the same x. No trailing "PDF" tag — right-aligned
+ * tags never line up against labels of different lengths. */
+function rowHTML(it, secondary) {
+  const glyph = it.pdf ? (it.bold ? ICON.docSmallBold : ICON.docSmall) : (it.arrow && secondary ? ICON.arrow : '');
+  const arrow = it.arrow && !secondary ? ICON.arrow : '';
+  const attrs = `${secondary ? ' data-secondary' : ''}${it.bold ? ' data-bold' : ''}${it.arrow && secondary ? ' data-out' : ''}`;
+  const target = it.pdf ? ' target="_blank" rel="noopener"' : '';
+  return `<a class="row"${attrs} href="${esc(it.href)}"${target}>${glyph}${esc(it.label)}${arrow}</a>`;
+}
+
+function tileHTML(f, phone) {
+  return `<div class="tile">
+    <div class="shot">product photo</div>
+    <div class="head"><div class="head-row"><span>${esc(f.heading)}</span></div><div class="rule"></div></div>
+    <form class="field" data-tile-search>${ICON.searchGray}<input type="search" placeholder="${esc(f.placeholder)}" aria-label="${esc(f.placeholder)}"></form>
+    <div class="tel">${ICON.phone}<a href="tel:${phone.replace(/\D/g, '')}">${esc(phone)}</a><span class="callus">Call Our Team</span></div>
+    <a class="cta" href="${esc(f.quoteHref)}">${esc(f.quoteLabel)}</a>
+  </div>`;
+}
+
+function megaHTML(entry, phone) {
+  const cols = entry.columns.map(c => `<div class="col">
+      <div class="head"><div class="head-row"><span>${esc(c.heading)}</span></div><div class="rule"></div></div>
+      <div class="rows"${c.secondary ? ' data-secondary' : ''}>${c.items.map(it => rowHTML(it, c.secondary)).join('')}</div>
+    </div>`).join('');
+  return `<div class="panel" data-panel="${esc(entry.label)}" role="region" aria-label="${esc(entry.label)} menu">
+    <div class="grid" data-cols="${entry.columns.length}">${cols}${tileHTML(entry.featured, phone)}</div>
+  </div>`;
+}
+
+function ddHTML(entry) {
+  return `<div class="dd" data-panel="${esc(entry.label)}" style="width:${entry.width}px" role="region" aria-label="${esc(entry.label)} menu">
+    <div class="rows">${entry.items.map(it => rowHTML(it, false)).join('')}</div>
+  </div>`;
+}
+
+/* Mobile mirrors the desktop panel exactly: the same three groups in the same
+ * order with the same rows, stacked. Catalog rows carry the document glyph. */
 function treeHTML(phone) {
   return NAV.map(entry => {
     if (entry.type === 'link') return `<a class="trow" href="${esc(entry.href)}">${esc(entry.label)}</a>`;
@@ -328,12 +457,58 @@ class AutojetNav extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+    this._open = null;
+    this._hoverTimer = null;
+    this._leaveTimer = null;
   }
 
   connectedCallback() {
     this._teardown();
     this._phone = this.getAttribute('phone') || PHONE;
     this.shadowRoot.innerHTML = this._render();
+
+    // Responsive breakpoint setup runs BEFORE _wire() and is wrapped separately
+    // from it on purpose. It used to run after _wire(), and when an unguarded
+    // selector in _wire() threw (see the fix in _wire() below), the exception
+    // aborted the rest of connectedCallback and this block never ran — silently
+    // disabling the mobile/desktop switch and the hamburger menu with no visible
+    // error unless the console was checked. Running this first, and wrapping
+    // _wire() in try/catch, means a future _wire() bug can degrade menu clicks
+    // without ever again taking down responsiveness with it.
+    const mobileBreakpoint = parseInt(this.getAttribute('mobile-breakpoint'), 10) || 960;
+    const compactBreakpoint = parseInt(this.getAttribute('compact-breakpoint'), 10) || 1260;
+    this._sync = () => {
+      const width = this.getBoundingClientRect().width;
+      if (width > 0 && width <= mobileBreakpoint) {
+        // true hamburger tier: items + phone alone don't fit either
+        this.setAttribute('data-mobile', '');
+        this.removeAttribute('data-compact');
+      } else if (width > 0 && width <= compactBreakpoint) {
+        // compact tier: drop the hours/status text first, before ever
+        // reaching for the hamburger
+        this.removeAttribute('data-mobile');
+        this.setAttribute('data-compact', '');
+        this._closeSheet();
+      } else {
+        this.removeAttribute('data-mobile');
+        this.removeAttribute('data-compact');
+        this._closeSheet();
+      }
+    };
+    if (typeof ResizeObserver !== 'undefined') {
+      this._ro = new ResizeObserver(() => this._sync());
+      this._ro.observe(this);
+    } else {
+      // very old browsers only: falls back to viewport width via matchMedia,
+      // and only tracks the mobile tier since matchMedia can't watch two
+      // thresholds as cleanly as ResizeObserver can
+      this._mq = window.matchMedia(`(max-width:${mobileBreakpoint}px)`);
+      this._mq.addEventListener('change', this._sync);
+    }
+    // Backup signal alongside ResizeObserver: belt-and-suspenders in case a
+    // browser or embedding context ever delays or skips a resize-observer tick.
+    window.addEventListener('resize', this._sync);
+    this._sync();
 
     try {
       this._wire();
@@ -343,7 +518,7 @@ class AutojetNav extends HTMLElement {
 
     clearInterval(this._statusTimer);
     this._statusTimer = setInterval(() => {
-      const el = this.shadowRoot.querySelector('.sheet-foot .status');
+      const el = this.shadowRoot.querySelector('.util-right .status');
       if (el) el.outerHTML = this._status();
     }, 60000);
   }
@@ -351,16 +526,21 @@ class AutojetNav extends HTMLElement {
   disconnectedCallback() { clearInterval(this._statusTimer); this._teardown(); }
 
   _teardown() {
+    clearTimeout(this._hoverTimer);
+    clearTimeout(this._leaveTimer);
+    if (this._ro) this._ro.disconnect();
+    if (this._mq && this._sync) this._mq.removeEventListener('change', this._sync);
+    if (this._sync) window.removeEventListener('resize', this._sync);
+    if (this._onDocClick) document.removeEventListener('click', this._onDocClick, true);
     if (this._onKey) document.removeEventListener('keydown', this._onKey);
-    this._onKey = null;
+    this._ro = this._mq = this._sync = this._onDocClick = this._onKey = null;
+    this._open = null;
   }
 
   attributeChangedCallback() { if (this.shadowRoot.childElementCount) this.connectedCallback(); }
 
   /* Business hours, America/Chicago. Mon-Fri 7:00am-5:00pm.
-   * HOLIDAYS force a closed day; HALF_DAYS close at noon. Shown in the
-   * sheet footer, not the top bar — the top bar now only carries logo,
-   * search, Get Quote and the burger. */
+   * HOLIDAYS force a closed day; HALF_DAYS close at noon. */
   _status() {
     const open = 7;
     const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric', hour12: false });
@@ -401,6 +581,18 @@ class AutojetNav extends HTMLElement {
   }
 
   _render() {
+    const items = NAV.map(e => {
+      if (e.type === 'link') return `<a class="item" href="${esc(e.href)}">${esc(e.label)}</a>`;
+      // the label is a real link to the category page; only the chevron toggles the panel
+      const parent = e.noLink
+        ? `<span>${esc(e.label)}</span>`
+        : `<a href="${esc(e.href || '#')}">${esc(e.label)}</a>`;
+      return `<div class="item" data-item="${esc(e.label)}">${parent}<button class="chev" type="button" data-trigger="${esc(e.label)}" aria-expanded="false" aria-haspopup="true" aria-label="Show ${esc(e.label)} menu">${ICON.chevron}</button></div>`;
+    }).join('');
+
+    const dds = NAV.filter(e => e.type === 'dropdown').map(ddHTML).join('');
+    const megas = NAV.filter(e => e.type === 'mega').map(e => megaHTML(e, this._phone)).join('');
+
     return `<style>${CSS}</style>
     <header class="bar">
       <div class="bar-top">
@@ -413,29 +605,117 @@ class AutojetNav extends HTMLElement {
           <button class="burger" type="button" data-burger aria-label="Open menu" aria-expanded="false">${ICON.burger}</button>
         </div>
       </div>
+      <div class="bar-btm">
+        <div class="wrap">
+          <nav class="items" aria-label="Main">${items}</nav>
+          <div class="util-right">
+            ${this._status()}
+            <a class="util-tel" href="tel:${this._phone.replace(/\D/g, '')}">${esc(this._phone)}</a>
+          </div>
+        </div>
+      </div>
     </header>
+    ${megas}${dds}
     <dialog class="sheet" data-sheet aria-label="Menu">
       <div class="sheet-bar">${this._logo()}<button class="sheet-x" type="button" data-close aria-label="Close menu">${ICON.close}</button></div>
       <div class="sheet-search"><form class="field" data-sheet-search>${ICON.searchGray}<input type="search" placeholder="Search by Part, OE, or Model" aria-label="Search by Part, OE, or Model"></form></div>
       <nav class="tree" aria-label="Main">${treeHTML(this._phone)}</nav>
       <div class="sheet-foot">
         <a class="quote" href="${esc(this.getAttribute('quote-href') || '#')}">Get Quote</a>
-        ${this._status()}
         <div class="tel">${ICON.phone}<a href="tel:${this._phone.replace(/\D/g, '')}">${esc(this._phone)}</a></div>
       </div>
     </dialog>`;
   }
 
+  /* ----- desktop open/close: 150ms hover intent, click, Escape, outside ----- */
+
+  _panelFor(label) { return this.shadowRoot.querySelector(`[data-panel="${label}"]`); }
+
+  _openMenu(label) {
+    if (this._open === label) return;
+    this._closeMenu();
+    const panel = this._panelFor(label);
+    const wrap = this.shadowRoot.querySelector(`[data-item="${label}"]`);
+    const trigger = this.shadowRoot.querySelector(`[data-trigger="${label}"]`);
+    if (!panel) return;
+    // dropdowns align to their parent item; mega panels are full width
+    if (panel.classList.contains('dd') && wrap) {
+      const row = this.shadowRoot.querySelector('.bar-btm .wrap').getBoundingClientRect();
+      panel.style.left = (wrap.getBoundingClientRect().left - row.left) + 'px';
+    }
+    panel.setAttribute('data-open', '');
+    if (wrap) wrap.setAttribute('data-open', '');
+    if (trigger) trigger.setAttribute('aria-expanded', 'true');
+    this._open = label;
+  }
+
+  _closeMenu() {
+    if (!this._open) return;
+    const panel = this._panelFor(this._open);
+    const wrap = this.shadowRoot.querySelector(`[data-item="${this._open}"]`);
+    const trigger = this.shadowRoot.querySelector(`[data-trigger="${this._open}"]`);
+    if (panel) panel.removeAttribute('data-open');
+    if (wrap) wrap.removeAttribute('data-open');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    this._open = null;
+  }
+
   _wire() {
     const root = this.shadowRoot;
 
+    root.querySelectorAll('[data-item]').forEach(wrap => {
+      const label = wrap.getAttribute('data-item');
+      const chev = wrap.querySelector('[data-trigger]');
+
+      wrap.addEventListener('mouseenter', () => {
+        clearTimeout(this._leaveTimer);
+        clearTimeout(this._hoverTimer);
+        this._hoverTimer = setTimeout(() => this._openMenu(label), 150);
+      });
+      wrap.addEventListener('mouseleave', () => clearTimeout(this._hoverTimer));
+
+      // chevron toggles; the label anchor is left alone so it navigates
+      chev.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        clearTimeout(this._hoverTimer);
+        if (this._open === label) this._closeMenu(); else this._openMenu(label);
+      });
+      chev.addEventListener('focus', () => this._openMenu(label));
+      // Resources has noLink: true, so its wrap holds a <span>, not an <a> — guard
+      // this instead of assuming every item wrap contains an anchor. Unguarded, this
+      // threw on that entry and aborted the rest of connectedCallback before it ever
+      // reached the responsive breakpoint setup below, which is what actually caused
+      // the "not responsive, no hamburger" bug (confirmed live: the whole sync/
+      // ResizeObserver setup never ran because this line crashed first).
+      const labelEl = wrap.querySelector('a');
+      if (labelEl) labelEl.addEventListener('focus', () => this._openMenu(label));
+    });
+
+    // leaving the whole header + panel region closes; re-entering cancels
+    const region = [root.querySelector('.bar'), ...root.querySelectorAll('.panel,.dd')];
+    region.forEach(el => {
+      el.addEventListener('mouseenter', () => clearTimeout(this._leaveTimer));
+      el.addEventListener('mouseleave', () => {
+        clearTimeout(this._leaveTimer);
+        this._leaveTimer = setTimeout(() => this._closeMenu(), 120);
+      });
+    });
+
     this._onKey = e => {
       if (e.key !== 'Escape') return;
+      this._closeMenu();
       this._closeSheet();
     };
     document.addEventListener('keydown', this._onKey);
 
-    // mobile sheet — the only nav surface now
+    this._onDocClick = e => {
+      if (e.composedPath().includes(this)) return;
+      this._closeMenu();
+    };
+    document.addEventListener('click', this._onDocClick, true);
+
+    // mobile sheet
     root.querySelector('[data-burger]').addEventListener('click', () => this._openSheet());
     root.querySelector('[data-close]').addEventListener('click', () => this._closeSheet());
     const sheetEl = root.querySelector('[data-sheet]');
@@ -455,7 +735,7 @@ class AutojetNav extends HTMLElement {
     });
 
     // search submits -> /parts?q=  (override the path with search-action)
-    root.querySelectorAll('form[data-bar-search],form[data-sheet-search]').forEach(form => {
+    root.querySelectorAll('form[data-bar-search],form[data-sheet-search],form[data-tile-search]').forEach(form => {
       form.addEventListener('submit', e => {
         e.preventDefault();
         const q = form.querySelector('input').value.trim();
