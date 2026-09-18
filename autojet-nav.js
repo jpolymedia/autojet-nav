@@ -1,15 +1,52 @@
 /* Auto-jet navigation — Wix Studio Custom Element
  * Tag: <autojet-nav>
- * Attributes: logo-src, logo-href, phone, quote-href, search-action, mobile-breakpoint
+ * Attributes: logo-src, logo-href, phone, quote-href, search-action,
+ * compact-breakpoint, mobile-breakpoint
  *
- * ONE DESKTOP ROW, NO SECOND BLACK BAR. Logo, nav items (with hover
- * dropdowns/mega panels), search, Get Quote, and a compact open/closed +
- * phone readout all sit in a single header row on wide screens. There is no
- * separate row underneath it. Below mobile-breakpoint (default 1480, since
- * a single row carrying all of that needs real width to avoid crowding or
- * overflow) it collapses to logo + a small search icon + an enlarged
- * hamburger, with items, Get Quote, phone and hours all living in the
- * hamburger sheet, same as before.
+ * TWO-TIER RESPONSIVE COLLAPSE. The bottom row (nav items + hours status +
+ * phone) does not drop to the hamburger menu all at once. There are two
+ * independent width thresholds:
+ *
+ * 1. compact-breakpoint (default 1260) is the point where the FULL bottom
+ *    row (items + hours/status + phone) stops fitting. Below this width the
+ *    component adds [data-compact]: the "Open Now / Closes 5 PM CT" status
+ *    text hides (the phone number itself stays put). Nav items, the phone
+ *    number, and the top-bar search field all stay visible in place through
+ *    this whole tier — this buys room so the hamburger does not have to
+ *    appear yet. The search field has its own headroom at every width down
+ *    to the mobile tier and doesn't need to change here.
+ *    Derivation: the 8 top-level items need ~660px unconstrained, the
+ *    status+phone block is a fixed 404px, the row gap is 24px, and the
+ *    wrap's side padding is clamp(24px, 6.25vw, 80px) per side. Solving
+ *    width = 660 + 24 + 404 + 2*(0.0625*width) gives ~1244px as the exact
+ *    overlap point; 1260 adds a small buffer.
+ *
+ * 2. mobile-breakpoint (default 960) is the point where items + phone ALONE
+ *    (status already hidden by the compact tier) still do not fit. Only
+ *    below this width does the component switch to the hamburger: items,
+ *    the quote button, and the search affordance all move into the mobile
+ *    sheet, and the whole bottom row hides.
+ *    Derivation: 660 (items) + 24 (gap) + 140 (phone block alone, no
+ *    status) + 2*(0.0625*width) = width gives ~942px; 960 adds a small
+ *    buffer.
+ *
+ * If the NAV array below changes (an item added/removed/renamed), or the
+ * phone/status block widths change, re-measure the real item row's width
+ * (nav.shadowRoot.querySelector('.items').scrollWidth with data-mobile and
+ * data-compact forced off) and recompute BOTH thresholds — don't just nudge
+ * these numbers by feel, or the tiers drift out of sync with what the
+ * content actually needs, which is the bug this replaced.
+ *
+ * RESPONSIVE MEASUREMENT: the mobile/compact/desktop switch watches this
+ * element's own rendered width (ResizeObserver on `this`), not
+ * window.innerWidth, with a window resize listener as a backup signal.
+ * Inside Wix, this component's box can be narrower than the browser
+ * viewport (a fixed-width widget setting, a non-stretched container,
+ * editor-side scaling) and a viewport-based matchMedia will report
+ * "desktop" even when the box itself has no room for the desktop row. If
+ * the widget's box still doesn't reach full browser width even on a wide
+ * screen, that's a Wix Editor layout setting (width set to "Stretch"/
+ * "Full Width", not a fixed pixel width), not something this file controls.
  *
  * EDIT THE NAV ARRAY BELOW. Desktop panels and the mobile accordion both read it,
  * so every label and URL is maintained in exactly one place.
@@ -112,7 +149,7 @@ const NAV = [
           // no truck brand pages yet, so these rows serve the brand catalog PDFs
           { label: 'Chevrolet-GMC', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_1199d42a933d44eca1c6d0098e7ddf6d.pdf', pdf: true },
           { label: 'Ford', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_a2a9e1966089407896bcb941a8cd7320.pdf', pdf: true },
-          { label: 'Freightliner', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_a2a9e1966089407896bcb941a8cd7320.pdf', pdf: true },
+          { label: 'Freightliner', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_33525896d14940349da522216a8e8536.pdf', pdf: true },
           { label: 'Isuzu', href: '/parts?brand=Isuzu' },
           { label: 'Navistar International', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_aff7fd91fee341e992c6bb99d53d2d4b.pdf', pdf: true }
         ]
@@ -124,7 +161,7 @@ const NAV = [
           // system pages until the truck versions ship.
           { label: 'DPF and Emissions', href: '/dpf-and-emissions' },
           { label: 'Catalytic Converters and Mufflers', href: '/catalytic-converters-and-mufflers' },
-          { label: 'Performance Exhaust', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_8db1639b462b4ef5b34ddcc5a49b39c6.pdf', pdf: true },
+          { label: 'Performance Exhaust', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_1a36d6e3b86b4e5c847456bf19688c06.pdf', pdf: true },
           { label: 'Crossover Pipes', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_3273b0cda0dc47caa0b91a58d58929dd.pdf', pdf: true },
           { label: 'Accessories', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_872c682e617749b0870031c4fd48148a.pdf', pdf: true }
         ]
@@ -142,6 +179,7 @@ const NAV = [
           { label: 'Mufflers', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_3fac61dde47b4087b4223bf8bfc94a53.pdf', pdf: true },
           { label: 'Navistar International', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_aff7fd91fee341e992c6bb99d53d2d4b.pdf', pdf: true },
           { label: 'Performance', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_1a36d6e3b86b4e5c847456bf19688c06.pdf', pdf: true },
+          // the six vintage files live on their own archive page
           { label: 'Vintage & Discontinued', href: '/vintage-and-discontinued', pdf: true }
         ]
       }
@@ -165,6 +203,8 @@ const NAV = [
   { label: 'OEM', href: '/oem', type: 'link' },
 
   {
+    // Resources is a category, not a page: /resources IS the blog, so the parent
+    // is not a link (noLink) and the Blog row carries that URL.
     label: 'Resources', type: 'dropdown', noLink: true, width: 280,
     items: [
       { label: 'Blog', href: '/resources' },
@@ -188,13 +228,27 @@ const ICON = {
   arrow: '<svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="#056EB7" stroke-width="1.6" aria-hidden="true"><path d="M2 7h9M7.5 3.5L11 7l-3.5 3.5"/></svg>',
   chevron: '<svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M1.5 3.5L5 7 8.5 3.5"/></svg>',
   chevronM: '<svg viewBox="0 0 10 10" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M1.5 3.5L5 7 8.5 3.5"/></svg>',
-  burger: '<svg viewBox="0 0 20 20" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 5h16M2 10h16M2 15h16"/></svg>',
+  burger: '<svg viewBox="0 0 20 20" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 5h16M2 10h16M2 15h16"/></svg>',
   close: '<svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 3l14 14M17 3L3 17"/></svg>'
 };
 
 /* ---------------------------------------------------------------- styles */
 
-const HOLIDAYS = []; // 'YYYY-MM-DD' entries force a closed day
+/* 'YYYY-MM-DD' entries force a full-day closure.
+ * TODO (confirm w/ Rich, mid-2027): 2027-07-04 falls on a Sunday and
+ * 2027-12-25 on a Saturday, so both are no-ops as written. If AJ observes
+ * them on the adjacent weekday, add '2027-07-05' and '2027-12-27' (or
+ * promote the '2027-12-24' half-day to a full closure). */
+const HOLIDAYS = [
+  '2026-11-26', '2026-12-25', '2027-01-01', '2027-05-31',
+  '2027-07-04', '2027-09-06', '2027-11-25', '2027-12-25',
+];
+
+// 'YYYY-MM-DD' entries close at noon instead of 5 PM
+const HALF_DAYS = [
+  '2026-11-27', '2026-12-24', '2026-12-31',
+  '2027-11-26', '2027-12-24', '2027-12-31',
+];
 
 const LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 498 124.13" fill="currentColor" aria-hidden="true"><path d="M82.95,19.92h.16l-.1,27.17h-15.57l15.52-27.17ZM77.02,1.81l-44.79,71.85h19.85l6.7-11.68h24.28v11.68s19.84,0,19.84,0L99.67,1.81h-22.65Z"/><path d="M118.79,19.12h16.97l-8.33,28.18c-2.74,9.26-.57,12.48,5.12,12.48,6.01,0,11.79-4.12,14.44-13.08l8.15-27.57h16.98l-16.13,54.54h-16.49l2.08-7.05h-.16c-5.02,5.33-12.43,9.26-20.99,9.26-10.41,0-16.75-5.64-11.9-22.04l10.27-34.72Z"/><path d="M177.95,19.12h8.64l4.98-17.31h16.5l-4.98,17.31h10.9l-4.05,14.09h-10.9l-6.31,21.94c-1.42,4.93-.69,5.63,3.75,5.63,2.02,0,3.68-.1,5.9-.2l-3.82,13.28c-3.52.6-8,1-12.82,1-10.74,0-14.19-3.42-10.81-15.19l7.61-26.47h-8.64l4.05-14.09Z"/><path d="M228.07,46.39c-2.95,10.26.24,15.4,7.71,15.4s13.62-5.13,16.57-15.4c2.95-10.26-.24-15.4-7.71-15.4s-13.61,5.13-16.57,15.4M248.69,16.91c19.07,0,26.66,10.16,21.1,29.48-5.55,19.32-18.99,29.48-38.05,29.48s-26.65-10.16-21.1-29.48c5.55-19.32,18.99-29.48,38.05-29.48"/><polygon points="277.44 39.69 303.41 39.69 298.95 55.18 272.99 55.18 277.44 39.69"/><path d="M326.43,0h16.5l-3.7,12.88h-16.5l3.7-12.88ZM283.09,109.24h4.36c5.76,0,6.64-.9,8.41-7.05l25.08-83.07h16.5l-25.51,84.58c-4.51,15.7-9.06,20.42-22.45,20.42-3.12,0-8.42-.2-10.57-.3l4.19-14.59Z"/><path d="M376.93,40.35c.8-6.04-1.22-11.17-9.01-11.17s-12.76,5.13-15.43,11.17h24.44ZM388.2,57.46c-4.63,9.06-15.33,18.42-33.31,18.42-18.99,0-26.89-9.36-21.07-29.59,5.56-19.32,20.05-29.38,37.56-29.38s26.34,10.16,19.8,32.9l-.47,1.61h-41.41c-1.17,7.04,1.25,12.17,9.73,12.17,5.29,0,8.86-2.92,11.73-6.14h17.43Z"/><path d="M402.49,19.12h8.64l4.98-17.31h16.5l-4.98,17.31h10.9l-4.05,14.09h-10.9l-6.31,21.94c-1.42,4.93-.69,5.63,3.75,5.63,2.02,0,3.68-.1,5.9-.2l-3.82,13.28c-3.52.6-8,1-12.82,1-10.74,0-14.19-3.42-10.81-15.19l7.61-26.47h-8.64l4.05-14.09Z"/><path d="M37.36,45.05l-15.28,24.64s-5.42,8.88,2.96,8.88h266.18l-4.44,17.25H20.11c-16.76,0-42.39-14.79,17.25-50.77"/><polygon points="328.68 78.57 425.79 78.57 421.35 95.82 324.25 95.82 328.68 78.57"/><path d="M497.75,88.42c-1.72,2.71-6.41,4.19-6.41,4.19h-13.56l-2.46,2.71h-11.34l-9.12,15.77h-10.1l4.93-16.26c-4.19-.25-10.85-1.23-10.85-1.23l-4.93,8.63h-4.68l7.64-27.61h5.42l-.74,8.63s5.67-.74,11.09-1.23l4.68-16.27h10.1l-.25,15.77h9.36l2.46,2.71h12.57s4.69,1.48,6.41,4.19"/></svg>';
 
@@ -204,27 +258,29 @@ const CSS = `
 a{text-decoration:none;color:#333}
 button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 
-.bar{display:block;background:#1A1A1A;position:relative;z-index:2;border-bottom:3px solid #4DA8F0}
-.phoneblock{display:flex;align-items:center;gap:10px;flex:0 0 auto;white-space:nowrap}
-.util-tel{display:flex;align-items:baseline;gap:6px;flex:0 0 auto;font-weight:700;font-size:16px;letter-spacing:.01em;color:#4DA8F0;white-space:nowrap}
+.bar{display:block;background:#1A1A1A;position:relative;z-index:2}
+.util-right{display:flex;align-items:center;gap:14px;flex:0 0 auto}
+.util-tel{display:flex;align-items:baseline;justify-content:center;gap:6px;flex:0 0 auto;width:140px;font-weight:700;font-size:20px;letter-spacing:.01em;color:#4DA8F0;white-space:nowrap}
 .util-tel svg{flex:0 0 auto}
 .util-tel:hover{color:#fff}
 .util-tel:hover svg{fill:#fff}
-.status{display:flex;align-items:center;gap:7px;flex:0 0 auto;white-space:nowrap}
+.status{display:flex;align-items:center;justify-content:center;gap:7px;flex:0 0 auto;width:250px}
 .status .dot{flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:#4ED07A}
 .status .state{font-weight:700;font-size:14px;color:#fff}
-.status .until{font-weight:400;font-size:13px;color:#B4BAC2}
+.status .until{font-weight:400;font-size:14px;color:#B4BAC2}
 .status[data-closed] .dot{background:#8A9099}
 .status[data-closed] .state{color:#B4BAC2}
-.bar-top{display:flex;align-items:center;height:76px;box-sizing:border-box}
-.wrap{display:flex;align-items:center;gap:24px;width:100%;max-width:1680px;margin:0 auto;padding:0 clamp(20px, 4vw, 60px);box-sizing:border-box}
-.logo{display:block;flex:0 0 auto;width:150px;color:#fff}
+.bar-top{display:flex;height:69px;box-sizing:border-box}
+.bar-btm{display:flex;height:50px;padding-bottom:4px;border-top:1px solid rgba(255,255,255,.22);border-bottom:3px solid #4DA8F0;box-sizing:border-box}
+.wrap{display:flex;align-items:center;justify-content:space-between;gap:40px;width:100%;max-width:1600px;margin:0 auto;padding:0 clamp(24px, 6.25vw, 80px);box-sizing:border-box}
+.bar-btm .wrap{position:relative;gap:24px}
+.logo{display:block;flex:0 0 auto;width:158px;color:#fff}
 .logo svg{display:block;width:100%;height:auto}
 .logo img{display:block;width:100%;height:auto}
-.tools{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+.tools{display:flex;align-items:center;gap:14px;flex:0 0 auto}
 .rule{display:none}
 
-.items{position:relative;display:flex;align-items:center;gap:16px;height:100%;flex:1 1 auto;min-width:0}
+.items{display:flex;align-items:center;gap:22px;height:100%;flex:0 1 auto;min-width:0}
 .item{position:relative;display:flex;align-items:center;gap:3px;height:100%;flex:0 0 auto;font-weight:400;font-size:14px;color:#fff;white-space:nowrap}
 .item>a{display:flex;align-items:center;height:100%;color:inherit}
 .item:hover,.item[data-open]{color:#4DA8F0}
@@ -234,20 +290,19 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .item[data-open] .chev svg{transform:rotate(180deg)}
 
 
-.field{display:flex;align-items:center;gap:8px;flex:0 0 auto;width:200px;height:36px;padding:0 14px;border:1px solid #C9CED4;border-radius:2px;background:#fff}
+.field{display:flex;align-items:center;gap:8px;flex:0 0 auto;width:340px;height:36px;padding:0 16px;border:1px solid #C9CED4;border-radius:2px;background:#fff}
 .field svg{flex:0 0 auto;order:2}
 .field input{order:1;font-size:14px}
 .field input::placeholder{color:#8A9099}
 .field input{border:0;outline:0;width:100%;font:400 14px/1 'Wix Madefor Text',sans-serif;color:#333;background:none}
 .field input::placeholder{color:#8A9099}
-.quote{display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:130px;height:36px;background:#FBBF13;border-radius:2px;font-family:'Wix Madefor Text',sans-serif;font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:#1A1A1A}
+.quote{display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:140px;height:36px;background:#FBBF13;border-radius:2px;font-family:'Wix Madefor Text',sans-serif;font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:#1A1A1A}
 .quote:hover{background:#e6ad0c;color:#1A1A1A}
-.search-mobile{display:none;align-items:center;justify-content:center;width:44px;height:44px;color:#fff;flex:0 0 auto}
 
 /* panels */
 .panel{position:absolute;left:0;right:0;top:100%;background:#fff;box-shadow:0 10px 18px -12px rgba(0,0,0,.14);display:none;z-index:1}
 .panel[data-open]{display:block}
-.grid{display:grid;grid-template-columns:3fr 3fr 3fr 3.6fr;gap:40px;width:100%;max-width:1600px;margin:0 auto;padding:34px clamp(20px, 5.5vw, 80px) 40px;box-sizing:border-box}
+.grid{display:grid;grid-template-columns:3fr 3fr 3fr 3.6fr;gap:40px;width:100%;max-width:1600px;margin:0 auto;padding:34px clamp(24px, 6.25vw, 80px) 40px;box-sizing:border-box}
 .grid[data-cols="3"]{grid-template-columns:3fr 3fr 3fr 3.6fr}
 .col{display:flex;flex-direction:column;gap:18px;min-width:0}
 .head{display:flex;flex-direction:column;gap:7px}
@@ -285,11 +340,11 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .cta:hover{background:#045a96;color:#fff}
 
 /* mobile */
-.burger{display:none;align-items:center;justify-content:center;width:52px;height:52px;color:#fff;margin-right:-10px}
+.burger{display:none;align-items:center;justify-content:center;width:44px;height:44px;color:#fff;margin-right:-8px}
 .sheet{display:none;position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#fff;color:#333;z-index:9999;flex-direction:column;overscroll-behavior:contain}
 .sheet[open]{display:flex}
 .sheet::backdrop{background:#fff}
-.sheet-bar{display:flex;align-items:center;justify-content:space-between;height:72px;padding:6px 20px 0;background:#1A1A1A;flex:0 0 auto}
+.sheet-bar{display:flex;align-items:center;justify-content:space-between;height:72px;padding:0 20px;background:#1A1A1A;flex:0 0 auto}
 .sheet-bar .logo{width:132px}
 .sheet-x{color:#fff}
 .sheet-x{display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin-right:-10px}
@@ -316,11 +371,15 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .sheet-foot .tel a{font-size:20px;color:#056EB7}
 .sheet-foot .tel svg{display:none}
 
-:host([data-mobile]) .items,:host([data-mobile]) .quote,:host([data-mobile]) .field,:host([data-mobile]) .phoneblock{display:none}
-:host([data-mobile]) .burger,:host([data-mobile]) .search-mobile{display:flex}
+:host([data-compact]) .util-right .status{display:none}
+
+:host([data-mobile]) .items,:host([data-mobile]) .bar-top .quote,:host([data-mobile]) .bar-top .field{display:none}
+:host([data-mobile]) .burger{display:flex}
+
 
 :host([data-mobile]) .bar-top{height:66px}
 :host([data-mobile]) .wrap{padding:0 20px}
+:host([data-mobile]) .bar-btm{display:none}
 :host([data-mobile]) .logo{width:132px}
 `;
 
@@ -335,7 +394,8 @@ function rowHTML(it, secondary) {
   const glyph = it.pdf ? (it.bold ? ICON.docSmallBold : ICON.docSmall) : (it.arrow && secondary ? ICON.arrow : '');
   const arrow = it.arrow && !secondary ? ICON.arrow : '';
   const attrs = `${secondary ? ' data-secondary' : ''}${it.bold ? ' data-bold' : ''}${it.arrow && secondary ? ' data-out' : ''}`;
-  return `<a class="row"${attrs} href="${esc(it.href)}">${glyph}${esc(it.label)}${arrow}</a>`;
+  const target = it.pdf ? ' target="_blank" rel="noopener"' : '';
+  return `<a class="row"${attrs} href="${esc(it.href)}"${target}>${glyph}${esc(it.label)}${arrow}</a>`;
 }
 
 function tileHTML(f, phone) {
@@ -374,11 +434,11 @@ function treeHTML(phone) {
     if (entry.type === 'mega') {
       groups = entry.columns.map(c =>
         `<p class="tlabel">${esc(c.heading)}</p>` +
-        c.items.map(it => `<a class="tlink"${it.bold ? ' data-bold' : ''} href="${esc(it.href)}">${it.pdf ? ICON.docSmall : ''}${esc(it.label)}</a>`).join('')
+        c.items.map(it => `<a class="tlink"${it.bold ? ' data-bold' : ''} href="${esc(it.href)}"${it.pdf ? ' target="_blank" rel="noopener"' : ''}>${it.pdf ? ICON.docSmall : ''}${esc(it.label)}</a>`).join('')
       ).join('');
     } else {
       groups = entry.items.map(it =>
-        `<a class="tlink" href="${esc(it.href)}">${it.pdf ? ICON.docSmall : ''}${esc(it.label)}${it.arrow ? ICON.arrow : ''}</a>`).join('');
+        `<a class="tlink" href="${esc(it.href)}"${it.pdf ? ' target="_blank" rel="noopener"' : ''}>${it.pdf ? ICON.docSmall : ''}${esc(it.label)}${it.arrow ? ICON.arrow : ''}</a>`).join('');
     }
 
     const tname = entry.noLink
@@ -406,19 +466,61 @@ class AutojetNav extends HTMLElement {
     this._teardown();
     this._phone = this.getAttribute('phone') || PHONE;
     this.shadowRoot.innerHTML = this._render();
-    this._wire();
+
+    // Responsive breakpoint setup runs BEFORE _wire() and is wrapped separately
+    // from it on purpose. It used to run after _wire(), and when an unguarded
+    // selector in _wire() threw (see the fix in _wire() below), the exception
+    // aborted the rest of connectedCallback and this block never ran — silently
+    // disabling the mobile/desktop switch and the hamburger menu with no visible
+    // error unless the console was checked. Running this first, and wrapping
+    // _wire() in try/catch, means a future _wire() bug can degrade menu clicks
+    // without ever again taking down responsiveness with it.
+    const mobileBreakpoint = parseInt(this.getAttribute('mobile-breakpoint'), 10) || 960;
+    const compactBreakpoint = parseInt(this.getAttribute('compact-breakpoint'), 10) || 1260;
+    this._sync = () => {
+      const width = this.getBoundingClientRect().width;
+      if (width > 0 && width <= mobileBreakpoint) {
+        // true hamburger tier: items + phone alone don't fit either
+        this.setAttribute('data-mobile', '');
+        this.removeAttribute('data-compact');
+      } else if (width > 0 && width <= compactBreakpoint) {
+        // compact tier: drop the hours/status text first, before ever
+        // reaching for the hamburger
+        this.removeAttribute('data-mobile');
+        this.setAttribute('data-compact', '');
+        this._closeSheet();
+      } else {
+        this.removeAttribute('data-mobile');
+        this.removeAttribute('data-compact');
+        this._closeSheet();
+      }
+    };
+    if (typeof ResizeObserver !== 'undefined') {
+      this._ro = new ResizeObserver(() => this._sync());
+      this._ro.observe(this);
+    } else {
+      // very old browsers only: falls back to viewport width via matchMedia,
+      // and only tracks the mobile tier since matchMedia can't watch two
+      // thresholds as cleanly as ResizeObserver can
+      this._mq = window.matchMedia(`(max-width:${mobileBreakpoint}px)`);
+      this._mq.addEventListener('change', this._sync);
+    }
+    // Backup signal alongside ResizeObserver: belt-and-suspenders in case a
+    // browser or embedding context ever delays or skips a resize-observer tick.
+    window.addEventListener('resize', this._sync);
+    this._sync();
+
+    try {
+      this._wire();
+    } catch (err) {
+      console.error('autojet-nav: _wire() failed, menu interactions may be degraded', err);
+    }
+
     clearInterval(this._statusTimer);
     this._statusTimer = setInterval(() => {
-      const el = this.shadowRoot.querySelector('.phoneblock .status');
+      const el = this.shadowRoot.querySelector('.util-right .status');
       if (el) el.outerHTML = this._status();
     }, 60000);
-    this._mq = window.matchMedia(`(max-width:${this.getAttribute('mobile-breakpoint') || 1480}px)`);
-    this._sync = () => {
-      if (this._mq.matches) this.setAttribute('data-mobile', '');
-      else { this.removeAttribute('data-mobile'); this._closeSheet(); }
-    };
-    this._mq.addEventListener('change', this._sync);
-    this._sync();
   }
 
   disconnectedCallback() { clearInterval(this._statusTimer); this._teardown(); }
@@ -426,30 +528,50 @@ class AutojetNav extends HTMLElement {
   _teardown() {
     clearTimeout(this._hoverTimer);
     clearTimeout(this._leaveTimer);
+    if (this._ro) this._ro.disconnect();
     if (this._mq && this._sync) this._mq.removeEventListener('change', this._sync);
+    if (this._sync) window.removeEventListener('resize', this._sync);
     if (this._onDocClick) document.removeEventListener('click', this._onDocClick, true);
     if (this._onKey) document.removeEventListener('keydown', this._onKey);
-    this._mq = this._sync = this._onDocClick = this._onKey = null;
+    this._ro = this._mq = this._sync = this._onDocClick = this._onKey = null;
     this._open = null;
   }
 
   attributeChangedCallback() { if (this.shadowRoot.childElementCount) this.connectedCallback(); }
 
   /* Business hours, America/Chicago. Mon-Fri 7:00am-5:00pm.
-   * Add dates to HOLIDAYS as YYYY-MM-DD to force a closed day. */
+   * HOLIDAYS force a closed day; HALF_DAYS close at noon. */
   _status() {
-    const open = 7, close = 17;
+    const open = 7;
     const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric', hour12: false });
     const parts = {};
     for (const p of fmt.formatToParts(new Date())) parts[p.type] = p.value;
     const day = parts.weekday, hour = parseInt(parts.hour, 10);
     const ymd = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago' }).format(new Date());
     const weekday = !['Sat', 'Sun'].includes(day);
+    const close = HALF_DAYS.includes(ymd) ? 12 : 17;
+    const closeLabel = close === 12 ? '12 PM CT' : '5 PM CT';
     const isOpen = weekday && !HOLIDAYS.includes(ymd) && hour >= open && hour < close;
-    const next = day === 'Fri' && hour >= close ? 'Monday' : day === 'Sat' ? 'Monday' : day === 'Sun' ? 'Monday' : weekday && hour >= close ? 'tomorrow' : 'today';
+    const next = this._nextOpen(ymd, day, hour, open, close, weekday);
     return isOpen
-      ? `<div class="status"><span class="dot"></span><span class="state">Open Now</span><span class="until">Closes 5 PM CT</span></div>`
-      : `<div class="status" data-closed><span class="dot"></span><span class="state">Closed</span><span class="until">Opens 7 AM CT ${next === 'today' ? 'today' : next}</span></div>`;
+      ? `<div class="status"><span class="dot"></span><span class="state">Open Now</span><span class="until">Closes ${closeLabel}</span></div>`
+      : `<div class="status" data-closed><span class="dot"></span><span class="state">Closed</span><span class="until">Opens 7 AM CT ${next}</span></div>`;
+  }
+
+  /* Walks forward from today to the next day the shop actually opens,
+   * skipping weekends and HOLIDAYS. Returns 'today', 'tomorrow' or a weekday name. */
+  _nextOpen(ymd, day, hour, open, close, weekday) {
+    if (weekday && !HOLIDAYS.includes(ymd) && hour < open) return 'today';
+    const names = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const cursor = new Date(`${ymd}T12:00:00Z`);
+    for (let i = 1; i <= 14; i++) {
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+      const iso = cursor.toISOString().slice(0, 10);
+      const dow = cursor.getUTCDay();
+      if (dow === 0 || dow === 6 || HOLIDAYS.includes(iso)) continue;
+      return i === 1 ? 'tomorrow' : names[dow];
+    }
+    return 'Monday';
   }
 
   _logo() {
@@ -461,6 +583,7 @@ class AutojetNav extends HTMLElement {
   _render() {
     const items = NAV.map(e => {
       if (e.type === 'link') return `<a class="item" href="${esc(e.href)}">${esc(e.label)}</a>`;
+      // the label is a real link to the category page; only the chevron toggles the panel
       const parent = e.noLink
         ? `<span>${esc(e.label)}</span>`
         : `<a href="${esc(e.href || '#')}">${esc(e.label)}</a>`;
@@ -475,17 +598,20 @@ class AutojetNav extends HTMLElement {
       <div class="bar-top">
         <div class="wrap">
           ${this._logo()}
-          <nav class="items" aria-label="Main">${items}</nav>
           <div class="tools">
             <form class="field" data-bar-search>${ICON.searchGray}<input type="search" placeholder="Search by Part, OE, or Model" aria-label="Search by Part, OE, or Model"></form>
             <a class="quote" href="${esc(this.getAttribute('quote-href') || '#')}">Get Quote</a>
-            <div class="phoneblock">
-              ${this._status()}
-              <a class="util-tel" href="tel:${this._phone.replace(/\D/g, '')}">${esc(this._phone)}</a>
-            </div>
           </div>
-          <button class="search-mobile" type="button" data-search-mobile aria-label="Search">${ICON.searchWhite}</button>
           <button class="burger" type="button" data-burger aria-label="Open menu" aria-expanded="false">${ICON.burger}</button>
+        </div>
+      </div>
+      <div class="bar-btm">
+        <div class="wrap">
+          <nav class="items" aria-label="Main">${items}</nav>
+          <div class="util-right">
+            ${this._status()}
+            <a class="util-tel" href="tel:${this._phone.replace(/\D/g, '')}">${esc(this._phone)}</a>
+          </div>
         </div>
       </div>
     </header>
@@ -512,8 +638,9 @@ class AutojetNav extends HTMLElement {
     const wrap = this.shadowRoot.querySelector(`[data-item="${label}"]`);
     const trigger = this.shadowRoot.querySelector(`[data-trigger="${label}"]`);
     if (!panel) return;
+    // dropdowns align to their parent item; mega panels are full width
     if (panel.classList.contains('dd') && wrap) {
-      const row = this.shadowRoot.querySelector('.bar-top .wrap').getBoundingClientRect();
+      const row = this.shadowRoot.querySelector('.bar-btm .wrap').getBoundingClientRect();
       panel.style.left = (wrap.getBoundingClientRect().left - row.left) + 'px';
     }
     panel.setAttribute('data-open', '');
@@ -547,6 +674,7 @@ class AutojetNav extends HTMLElement {
       });
       wrap.addEventListener('mouseleave', () => clearTimeout(this._hoverTimer));
 
+      // chevron toggles; the label anchor is left alone so it navigates
       chev.addEventListener('click', e => {
         e.preventDefault();
         e.stopPropagation();
@@ -554,9 +682,17 @@ class AutojetNav extends HTMLElement {
         if (this._open === label) this._closeMenu(); else this._openMenu(label);
       });
       chev.addEventListener('focus', () => this._openMenu(label));
-      wrap.querySelector('a').addEventListener('focus', () => this._openMenu(label));
+      // Resources has noLink: true, so its wrap holds a <span>, not an <a> — guard
+      // this instead of assuming every item wrap contains an anchor. Unguarded, this
+      // threw on that entry and aborted the rest of connectedCallback before it ever
+      // reached the responsive breakpoint setup below, which is what actually caused
+      // the "not responsive, no hamburger" bug (confirmed live: the whole sync/
+      // ResizeObserver setup never ran because this line crashed first).
+      const labelEl = wrap.querySelector('a');
+      if (labelEl) labelEl.addEventListener('focus', () => this._openMenu(label));
     });
 
+    // leaving the whole header + panel region closes; re-entering cancels
     const region = [root.querySelector('.bar'), ...root.querySelectorAll('.panel,.dd')];
     region.forEach(el => {
       el.addEventListener('mouseenter', () => clearTimeout(this._leaveTimer));
@@ -579,12 +715,8 @@ class AutojetNav extends HTMLElement {
     };
     document.addEventListener('click', this._onDocClick, true);
 
+    // mobile sheet
     root.querySelector('[data-burger]').addEventListener('click', () => this._openSheet());
-    root.querySelector('[data-search-mobile]').addEventListener('click', () => {
-      this._openSheet();
-      const input = root.querySelector('.sheet-search input');
-      if (input) input.focus();
-    });
     root.querySelector('[data-close]').addEventListener('click', () => this._closeSheet());
     const sheetEl = root.querySelector('[data-sheet]');
     sheetEl.addEventListener('close', () => {
@@ -602,6 +734,7 @@ class AutojetNav extends HTMLElement {
       });
     });
 
+    // search submits -> /parts?q=  (override the path with search-action)
     root.querySelectorAll('form[data-bar-search],form[data-sheet-search],form[data-tile-search]').forEach(form => {
       form.addEventListener('submit', e => {
         e.preventDefault();
@@ -621,6 +754,7 @@ class AutojetNav extends HTMLElement {
     else sheet.setAttribute('open', '');
     this.shadowRoot.querySelector('[data-burger]').setAttribute('aria-expanded', 'true');
     document.documentElement.style.overflow = 'hidden';
+    // every accordion starts collapsed so the tree opens short and scannable
     this.shadowRoot.querySelectorAll('[data-acc]').forEach(b => b.setAttribute('aria-expanded', 'false'));
     this.shadowRoot.querySelectorAll('[data-sub]').forEach(sub => sub.removeAttribute('data-open'));
     this.shadowRoot.querySelector('.tree').scrollTop = 0;
