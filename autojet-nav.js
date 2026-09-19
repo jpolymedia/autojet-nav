@@ -57,8 +57,8 @@
  * runs out of room, the component adds [data-quote-hidden] and Get Quote
  * drops from the top bar first, ahead of the phone number — Auto-jet's
  * sales close by phone, not the quote form, so the phone stays and Get Quote
- * remains reachable via the mega-menu tile CTAs and the Contact nav link
- * until the hamburger tier recovers it in the mobile sheet footer.
+ * remains reachable via the Contact nav link until the hamburger tier
+ * recovers it in the mobile sheet footer.
  * Derivation: logo 158 + wrap gap 40 + tools row (search 260 + gap 14 +
  * quote 140 + gap 14 + phone ~140) + 2*(0.0625*width) side padding gives a
  * rough overlap in the 810-925px range depending on where the clamped
@@ -171,13 +171,7 @@ const NAV = [
           { label: 'Thomas Built', href: 'https://www.auto-jet.com/_files/ugd/3978df_d1256cdb76ef4885b34d5f3d49332a4c.pdf?index=true', pdf: true }
         ]
       }
-    ],
-    featured: {
-      heading: 'Find your part',
-      placeholder: 'Search by Part, OE, or Model',
-      quoteLabel: 'Request a Quote',
-      quoteHref: '/contact'
-    }
+    ]
   },
 
   {
@@ -235,13 +229,7 @@ const NAV = [
           { label: 'Vintage & Discontinued', href: '/vintage-and-discontinued', pdf: true }
         ]
       }
-    ],
-    featured: {
-      heading: 'Find your part',
-      placeholder: 'Search by Part, OE, or Model',
-      quoteLabel: 'Request a Quote',
-      quoteHref: '/contact'
-    }
+    ]
   },
 
   {
@@ -376,8 +364,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 /* panels */
 .panel{position:absolute;left:0;right:0;top:100%;background:#fff;box-shadow:0 10px 18px -12px rgba(0,0,0,.14);display:none;z-index:1}
 .panel[data-open]{display:block}
-.grid{display:grid;grid-template-columns:3fr 3fr 3fr 3.6fr;gap:40px;width:100%;max-width:1600px;margin:0 auto;padding:34px clamp(24px, 6.25vw, 80px) 40px;box-sizing:border-box}
-.grid[data-cols="3"]{grid-template-columns:3fr 3fr 3fr 3.6fr}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:40px;width:100%;max-width:1600px;margin:0 auto;padding:34px clamp(24px, 6.25vw, 80px) 40px;box-sizing:border-box}
 .col{display:flex;flex-direction:column;gap:18px;min-width:0}
 .head{display:flex;flex-direction:column;gap:7px}
 .head-row{display:flex;align-items:center;gap:8px}
@@ -397,21 +384,6 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .dd{position:absolute;top:calc(100% + 7px);left:0;background:#fff;box-shadow:0 10px 18px -12px rgba(0,0,0,.14);padding:18px 20px;display:none;z-index:1}
 .dd[data-open]{display:block}
 .dd .rows{gap:8px}
-
-/* featured tile */
-.tile{background:#F4F6F8;padding:20px}
-.tile .head{margin-bottom:14px}
-.tile .search-wrap{display:block;width:100%}
-.tile .field{width:100%;max-width:260px;margin-bottom:18px;box-sizing:border-box}
-.tile .go{display:flex;align-items:center;justify-content:center;width:46px;height:42px;background:#056EB7;border-radius:0 2px 2px 0}
-.tile .go:hover{background:#045a96}
-.tel{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-bottom:18px}
-.tel-line{display:flex;align-items:center}
-.tel a{flex:0 0 auto;font-weight:700;font-size:20px;line-height:1.1;color:#333}
-.tel a:hover{color:#056EB7}
-.callus{font-size:13px;line-height:1.1;color:#5A6069}
-.cta{display:flex;align-items:center;justify-content:center;width:100%;max-width:260px;height:44px;background:#056EB7;border-radius:2px;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#fff}
-.cta:hover{background:#045a96;color:#fff}
 
 /* mobile */
 .burger{display:none;align-items:center;justify-content:center;width:48px;height:48px;color:#fff;margin-right:-10px}
@@ -441,34 +413,10 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .tlink[data-bold]{font-weight:700}
 .sheet-foot{flex:0 0 auto;padding:20px clamp(20px, 6.25vw, 80px) 24px;box-sizing:border-box}
 .sheet-foot .quote{width:100%;justify-content:center;height:50px;font-size:14px}
-.sheet-foot .tel{flex-direction:row;align-items:center;justify-content:center;margin:16px 0 0}
-.sheet-foot .tel a{font-size:20px;color:#056EB7}
+.tel{display:flex;align-items:center;justify-content:center;margin:16px 0 0}
+.tel a{font-size:20px;color:#056EB7}
 
 :host([data-compact]) .util-right .status{display:none}
-
-/* compact-tier mega panel: three text columns plus the Find Your Part tile
-   no longer fit side by side once the host drops under ~1260px. Bus Brands
-   stacks above Systems in one column so Download PDF Catalogs and the tile
-   each keep a real column of their own — the tile's own field/button now
-   shrink with their column (see .tile .search-wrap/.field below) instead of
-   overflowing it. */
-:host([data-compact]) .grid{grid-template-columns:1fr 1fr 1fr;grid-template-areas:"c1 c3 tile" "c2 c3 tile";column-gap:32px;row-gap:28px}
-:host([data-compact]) .grid > .col:nth-of-type(1){grid-area:c1}
-:host([data-compact]) .grid > .col:nth-of-type(2){grid-area:c2}
-:host([data-compact]) .grid > .col:nth-of-type(3){grid-area:c3}
-:host([data-compact]) .grid > .tile{grid-area:tile}
-
-/* in the quote-hidden band (900px down to the mobile breakpoint) the panel
-   itself is narrower still, so the tile drops to a full-width row below
-   the two text columns instead of squeezing into a third one. */
-:host([data-quote-hidden]) .grid{grid-template-columns:1fr 1fr;grid-template-areas:"c1 c3" "c2 c3" "tile tile"}
-:host([data-quote-hidden]) .grid > .tile{display:block}
-/* the tile now has the panel's full width to itself instead of one column's
-   share, so its 260px cap (sized to fit beside three other columns) just
-   leaves empty gray space — loosen it, but only here, where the room
-   actually exists. */
-:host([data-quote-hidden]) .tile .field,
-:host([data-quote-hidden]) .tile .cta{max-width:360px}
 
 /* phone-top tier: phone number moves from the bottom row up to the top bar,
  * next to Get Quote */
@@ -510,22 +458,13 @@ function rowHTML(it, secondary) {
   return `<a class="row"${attrs} href="${esc(it.href)}"${target}>${glyph}${esc(it.label)}${arrow}</a>`;
 }
 
-function tileHTML(f, phone) {
-  return `<div class="tile">
-    <div class="head"><div class="head-row"><span>${esc(f.heading)}</span></div><div class="rule"></div></div>
-    <div class="search-wrap"><form class="field" data-tile-search>${ICON.searchGray}<input type="search" placeholder="${esc(f.placeholder)}" aria-label="${esc(f.placeholder)}"></form></div>
-    <div class="tel"><span class="callus">Call Our Team</span><div class="tel-line"><a href="tel:${phone.replace(/\D/g, '')}">${esc(phone)}</a></div></div>
-    <a class="cta" href="${esc(f.quoteHref)}">${esc(f.quoteLabel)}</a>
-  </div>`;
-}
-
-function megaHTML(entry, phone) {
+function megaHTML(entry) {
   const cols = entry.columns.map(c => `<div class="col">
       <div class="head"><div class="head-row"><span>${esc(c.heading)}</span></div><div class="rule"></div></div>
       <div class="rows"${c.secondary ? ' data-secondary' : ''}>${c.items.map(it => rowHTML(it, c.secondary)).join('')}</div>
     </div>`).join('');
   return `<div class="panel" data-panel="${esc(entry.label)}" role="region" aria-label="${esc(entry.label)} menu">
-    <div class="grid" data-cols="${entry.columns.length}">${cols}${tileHTML(entry.featured, phone)}</div>
+    <div class="grid" data-cols="${entry.columns.length}">${cols}</div>
   </div>`;
 }
 
@@ -715,8 +654,8 @@ class AutojetNav extends HTMLElement {
         // Within this tier, once the top bar itself (logo + search + Get
         // Quote + phone) runs out of room, Get Quote drops before the phone
         // number does — Auto-jet's sales close by phone, not the quote
-        // form, and Get Quote stays reachable via the mega-menu tile CTAs
-        // and the Contact nav link at this width.
+        // form, and Get Quote stays reachable via the Contact nav link at
+        // this width.
         if (width <= quoteBreakpoint) this.setAttribute('data-quote-hidden', '');
         else this.removeAttribute('data-quote-hidden');
       } else if (width > 0 && width <= compactBreakpoint) {
@@ -836,7 +775,7 @@ class AutojetNav extends HTMLElement {
     }).join('');
 
     const dds = NAV.filter(e => e.type === 'dropdown').map(ddHTML).join('');
-    const megas = NAV.filter(e => e.type === 'mega').map(e => megaHTML(e, this._phone)).join('');
+    const megas = NAV.filter(e => e.type === 'mega').map(e => megaHTML(e)).join('');
 
     return `<style>${CSS}</style>
     <header class="bar">
@@ -985,7 +924,7 @@ class AutojetNav extends HTMLElement {
     });
 
     // search submits -> /parts?q=  (override the path with search-action)
-    root.querySelectorAll('form[data-bar-search],form[data-sheet-search],form[data-tile-search]').forEach(form => {
+    root.querySelectorAll('form[data-bar-search],form[data-sheet-search]').forEach(form => {
       form.addEventListener('submit', e => {
         e.preventDefault();
         const q = form.querySelector('input').value.trim();
@@ -996,10 +935,10 @@ class AutojetNav extends HTMLElement {
       });
     });
 
-    // quick-search dropdown: header bar field + mega-menu "Find your part" tile
-    // field only (not the mobile sheet field, which keeps plain submit-to-/parts).
+    // quick-search dropdown: header bar field only (not the mobile sheet
+    // field, which keeps plain submit-to-/parts).
     this._searchDDs = [];
-    root.querySelectorAll('form[data-bar-search],form[data-tile-search]').forEach(form => {
+    root.querySelectorAll('form[data-bar-search]').forEach(form => {
       this._setupQuickSearch(form);
     });
   }
