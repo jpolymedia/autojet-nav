@@ -299,10 +299,8 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .util-tel:hover svg{fill:#fff}
 /* top-bar phone: hidden by default, shown only in the phone-top tier (see
  * [data-phone-top] below), to the right of Get Quote */
-.util-tel-top{display:none;align-items:center;gap:6px;flex:0 0 auto;font-weight:700;font-size:15px;color:#4DA8F0;white-space:nowrap}
-.util-tel-top svg{flex:0 0 auto}
+.util-tel-top{display:none;align-items:center;flex:0 0 auto;font-weight:700;font-size:20px;letter-spacing:.01em;color:#4DA8F0;white-space:nowrap}
 .util-tel-top:hover{color:#fff}
-.util-tel-top:hover svg{fill:#fff}
 .status{display:flex;align-items:center;justify-content:center;gap:7px;flex:0 0 auto;width:250px}
 .status .dot{flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:#4ED07A}
 .status .state{font-weight:700;font-size:14px;color:#fff}
@@ -780,7 +778,7 @@ class AutojetNav extends HTMLElement {
           <div class="tools">
             <div class="search-wrap"><form class="field" data-bar-search>${ICON.searchGray}<input type="search" placeholder="Search by Part, OE, or Model" aria-label="Search by Part, OE, or Model"></form></div>
             <a class="quote" href="${esc(this.getAttribute('quote-href') || '#')}">Get Quote</a>
-            <a class="util-tel-top" href="tel:${this._phone.replace(/\D/g, '')}">${ICON.phoneSm}${esc(this._phone)}</a>
+            <a class="util-tel-top" href="tel:${this._phone.replace(/\D/g, '')}">${esc(this._phone)}</a>
           </div>
           <button class="burger" type="button" data-burger aria-label="Open menu" aria-expanded="false">${ICON.burger}</button>
         </div>
