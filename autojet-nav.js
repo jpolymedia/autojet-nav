@@ -149,9 +149,9 @@ const NAV = [
       {
         heading: 'Systems',
         items: [
-          { label: 'DPF and Emissions', href: '/dpf-and-emissions' },
-          { label: 'Catalytic Converters and Mufflers', href: '/catalytic-converters-and-mufflers' },
-          { label: 'Cooling and Radiators', href: '/cooling-and-radiators' },
+          { label: 'DPF & Emissions', href: '/dpf-and-emissions' },
+          { label: 'Catalytic Converters & Mufflers', href: '/catalytic-converters-and-mufflers' },
+          { label: 'Cooling & Radiators', href: '/cooling-and-radiators' },
           { label: 'Fuel Tanks', href: '/fuel-tanks' },
           { label: 'Accessories', href: '/school-bus-exhaust-accessories' }
         ]
@@ -211,8 +211,8 @@ const NAV = [
           // the generic system pages until the truck versions ship. Performance
           // Exhaust, Crossover Pipes, and Accessories have no pages at all yet,
           // routed to /truck as an interim stopgap, not a PDF.
-          { label: 'DPF and Emissions', href: '/dpf-and-emissions' },
-          { label: 'Catalytic Converters and Mufflers', href: '/catalytic-converters-and-mufflers' },
+          { label: 'DPF & Emissions', href: '/dpf-and-emissions' },
+          { label: 'Catalytic Converters & Mufflers', href: '/catalytic-converters-and-mufflers' },
           { label: 'Performance Exhaust', href: '/truck' },
           { label: 'Crossover Pipes', href: '/truck' },
           { label: 'Accessories', href: '/truck' }
@@ -463,6 +463,12 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
    the two text columns instead of squeezing into a third one. */
 :host([data-quote-hidden]) .grid{grid-template-columns:1fr 1fr;grid-template-areas:"c1 c3" "c2 c3" "tile tile"}
 :host([data-quote-hidden]) .grid > .tile{display:block}
+/* the tile now has the panel's full width to itself instead of one column's
+   share, so its 260px cap (sized to fit beside three other columns) just
+   leaves empty gray space — loosen it, but only here, where the room
+   actually exists. */
+:host([data-quote-hidden]) .tile .field,
+:host([data-quote-hidden]) .tile .cta{max-width:360px}
 
 /* phone-top tier: phone number moves from the bottom row up to the top bar,
  * next to Get Quote */
