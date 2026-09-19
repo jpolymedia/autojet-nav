@@ -405,11 +405,12 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .tile .field{width:100%;max-width:260px;margin-bottom:18px;box-sizing:border-box}
 .tile .go{display:flex;align-items:center;justify-content:center;width:46px;height:42px;background:#056EB7;border-radius:0 2px 2px 0}
 .tile .go:hover{background:#045a96}
-.tel{display:flex;align-items:baseline;gap:8px;margin-bottom:18px}
+.tel{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-bottom:18px}
+.tel-line{display:flex;align-items:center;gap:8px}
 .tel svg{flex:0 0 auto}
 .tel a{flex:0 0 auto;font-weight:700;font-size:20px;line-height:1.1;color:#333}
 .tel a:hover{color:#056EB7}
-.callus{flex:1 1 auto;min-width:0;font-size:13px;line-height:1.1;color:#5A6069}
+.callus{font-size:13px;line-height:1.1;color:#5A6069}
 .cta{display:flex;align-items:center;justify-content:center;width:100%;max-width:260px;height:44px;background:#056EB7;border-radius:2px;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#fff}
 .cta:hover{background:#045a96;color:#fff}
 
@@ -441,7 +442,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .tlink[data-bold]{font-weight:700}
 .sheet-foot{flex:0 0 auto;padding:20px clamp(20px, 6.25vw, 80px) 24px;box-sizing:border-box}
 .sheet-foot .quote{width:100%;justify-content:center;height:50px;font-size:14px}
-.sheet-foot .tel{align-items:center;justify-content:center;margin:16px 0 0}
+.sheet-foot .tel{flex-direction:row;align-items:center;justify-content:center;margin:16px 0 0}
 .sheet-foot .tel a{font-size:20px;color:#056EB7}
 .sheet-foot .tel svg{display:none}
 
@@ -509,7 +510,7 @@ function tileHTML(f, phone) {
   return `<div class="tile">
     <div class="head"><div class="head-row"><span>${esc(f.heading)}</span></div><div class="rule"></div></div>
     <div class="search-wrap"><form class="field" data-tile-search>${ICON.searchGray}<input type="search" placeholder="${esc(f.placeholder)}" aria-label="${esc(f.placeholder)}"></form></div>
-    <div class="tel">${ICON.phone}<a href="tel:${phone.replace(/\D/g, '')}">${esc(phone)}</a><span class="callus">Call Our Team</span></div>
+    <div class="tel"><span class="callus">Call Our Team</span><div class="tel-line">${ICON.phone}<a href="tel:${phone.replace(/\D/g, '')}">${esc(phone)}</a></div></div>
     <a class="cta" href="${esc(f.quoteHref)}">${esc(f.quoteLabel)}</a>
   </div>`;
 }
