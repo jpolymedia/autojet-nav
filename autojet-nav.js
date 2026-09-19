@@ -150,14 +150,21 @@ const NAV = [
       {
         heading: 'Parts by truck brand',
         items: [
-          // No truck brand pages exist yet, and /parts does not support a
-          // brand query-param filter (confirmed live: ?brand= is not read on
-          // load). Routed to /truck as an interim stopgap, not a PDF, until
-          // dedicated truck brand pages are built.
+          // No truck brand pages exist yet. Routed to /truck as an interim
+          // stopgap, not a PDF, until dedicated truck brand pages are built.
           { label: 'Chevrolet-GMC', href: '/truck' },
           { label: 'Ford', href: '/truck' },
           { label: 'Freightliner', href: '/truck' },
-          { label: 'Isuzu', href: '/truck' },
+          // CORRECTED 2026-09-19 per Autojet_Nav_Rollout_Deliverables_2026-09-16.md:
+          // Isuzu is not empty. The live Parts (Import2) collection has 3 real,
+          // published records under brand:"Isuzu" (DPF8057, DPFISU057,
+          // CUS-069-24), so routing it to the generic /truck page like its
+          // siblings above buries three sellable parts. /parts?brand=Isuzu is a
+          // real, working destination: autojet-search.js's boot(d) reads `brand`
+          // off the URL (`['category','type','brand'].forEach(...)`) straight
+          // into state.facets.busBrand on load, the same mechanism the site's
+          // breadcrumb links already use for `?category=` and `?type=`.
+          { label: 'Isuzu', href: '/parts?brand=Isuzu' },
           { label: 'Navistar International', href: '/truck' }
         ]
       },
@@ -308,6 +315,24 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .quote{display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:140px;height:36px;background:#FBBF13;border-radius:2px;font-family:'Wix Madefor Text',sans-serif;font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:#1A1A1A}
 .quote:hover{background:#e6ad0c;color:#1A1A1A}
 
+/* quick-search dropdown */
+.search-wrap{position:relative;display:inline-block;vertical-align:top}
+.search-dd{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#fff;border:1px solid #E4E7EB;box-shadow:0 10px 18px -12px rgba(0,0,0,.2);z-index:20;display:none;overflow:hidden}
+.search-dd[data-open]{display:block}
+.srow{display:flex;align-items:center;gap:10px;padding:8px 12px;color:#333;border-bottom:1px solid #F1F3F5}
+.srow:last-of-type{border-bottom:0}
+.srow:hover,.srow[data-hi]{background:#F4F6F8}
+.sthumb{flex:0 0 auto;width:40px;height:40px;border-radius:4px;overflow:hidden;background:#F4F6F8;border:1px solid #E9ECEF}
+.sthumb img{display:block;width:100%;height:100%;object-fit:contain}
+.sbody{min-width:0;display:flex;flex-direction:column;gap:2px}
+.sname{font-size:13px;font-weight:600;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.smeta{display:flex;align-items:center;gap:6px;font-size:12px;color:#5A6069;white-space:nowrap;overflow:hidden}
+.spn{font-weight:700;color:#056EB7;flex:0 0 auto}
+.sbrand{flex:0 0 auto;padding:1px 6px;border-radius:999px;background:#F4F6F8;border:1px solid #E4E7EB;font-size:11px;color:#5A6069;white-space:nowrap}
+.sall{display:block;padding:10px 12px;font-weight:700;font-size:13px;color:#056EB7;background:#F4F6F8;text-align:center;border-top:1px solid #E4E7EB}
+.sall:hover{background:#E8F2FB}
+.snone{padding:12px;font-size:12.5px;color:#5A6069}
+
 /* panels */
 .panel{position:absolute;left:0;right:0;top:100%;background:#fff;box-shadow:0 10px 18px -12px rgba(0,0,0,.14);display:none;z-index:1}
 .panel[data-open]{display:block}
@@ -411,7 +436,7 @@ function tileHTML(f, phone) {
   return `<div class="tile">
     <div class="shot">product photo</div>
     <div class="head"><div class="head-row"><span>${esc(f.heading)}</span></div><div class="rule"></div></div>
-    <form class="field" data-tile-search>${ICON.searchGray}<input type="search" placeholder="${esc(f.placeholder)}" aria-label="${esc(f.placeholder)}"></form>
+    <div class="search-wrap"><form class="field" data-tile-search>${ICON.searchGray}<input type="search" placeholder="${esc(f.placeholder)}" aria-label="${esc(f.placeholder)}"></form></div>
     <div class="tel">${ICON.phone}<a href="tel:${phone.replace(/\D/g, '')}">${esc(phone)}</a><span class="callus">Call Our Team</span></div>
     <a class="cta" href="${esc(f.quoteHref)}">${esc(f.quoteLabel)}</a>
   </div>`;
@@ -458,6 +483,106 @@ function treeHTML(phone) {
   }).join('');
 }
 
+/* ------------------------------------------------------ quick search data */
+
+/* Fetch-once + sessionStorage cache, same pattern as autojet-header-search.js's
+ * widget (cache key ajCat1). This uses a separate key because the slim row
+ * shape here differs (adds image + brand, drops several columns that widget
+ * doesn't need). Row shape from /_functions/catalog's r[] (see get_catalog in
+ * backend/http-functions.js): r[0] autoJetPart, r[1] oe (pipe-delimited),
+ * r[4] partTypeStandardized, r[8] hasImage (1/0), r[9] imgUrl,
+ * r[11] canonBrands (pipe-delimited). */
+const AJNAV_CACHE_KEY = 'ajNavCat2';
+const AJNAV_MAX = 8;
+const AJNAV_FALLBACK_IMG = 'https://static.wixstatic.com/media/3978df_4493127c97a84b909579252160cdbfc2~mv2.jpg';
+
+let AJNAV_DATA = null, AJNAV_LOADING = false, AJNAV_WAITERS = [];
+
+const ajnNorm = s => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+
+function ajnParse(slim) {
+  return slim.map(r => {
+    const part = r[0] || '';
+    const oe = (r[1] || '').split('|').filter(Boolean);
+    const partType = r[2] || '';
+    const brand = (r[3] || '').split('|').filter(Boolean)[0] || '';
+    const hasImage = !!r[4];
+    const img = r[5] || '';
+    return {
+      part, oeList: oe, partType, brand, hasImage, img,
+      _np: ajnNorm(part),
+      _noe: oe.map(ajnNorm),
+      _nkw: ajnNorm(partType + brand)
+    };
+  });
+}
+
+function ajnLoad(cb) {
+  if (AJNAV_DATA) { cb(AJNAV_DATA); return; }
+  AJNAV_WAITERS.push(cb);
+  if (AJNAV_LOADING) return;
+  AJNAV_LOADING = true;
+
+  const finish = data => {
+    AJNAV_DATA = data;
+    AJNAV_LOADING = false;
+    const waiters = AJNAV_WAITERS;
+    AJNAV_WAITERS = [];
+    waiters.forEach(fn => fn(data));
+  };
+
+  let cached = null;
+  try { cached = sessionStorage.getItem(AJNAV_CACHE_KEY); } catch (e) { /* storage unavailable */ }
+  if (cached) {
+    try { finish(JSON.parse(cached)); return; } catch (e) { /* fall through to fetch */ }
+  }
+
+  fetch('/_functions/catalog')
+    .then(r => r.json())
+    .then(d => {
+      const slim = (d.parts || []).map(r => [r[0] || '', r[1] || '', r[4] || '', r[11] || '', r[8] || 0, r[9] || '']);
+      const parsed = ajnParse(slim);
+      try { sessionStorage.setItem(AJNAV_CACHE_KEY, JSON.stringify(parsed)); } catch (e) { /* storage unavailable or full */ }
+      finish(parsed);
+    })
+    .catch(() => finish([]));
+}
+
+/* Four-tier match, most-specific first, capped at AJNAV_MAX total: part number
+ * prefix, part number substring, OE substring, then keyword (type+brand)
+ * substring. Mirrors the priority order autojet-header-search.js already uses. */
+function ajnSuggest(data, q) {
+  const nq = ajnNorm(q);
+  if (!nq) return [];
+  const out = [];
+  const seen = new Set();
+  const add = list => {
+    for (const p of list) {
+      if (seen.has(p.part)) continue;
+      seen.add(p.part);
+      out.push(p);
+      if (out.length >= AJNAV_MAX) return true;
+    }
+    return false;
+  };
+  if (add(data.filter(p => p._np.startsWith(nq)))) return out;
+  if (add(data.filter(p => p._np.includes(nq)))) return out;
+  if (add(data.filter(p => p._noe.some(o => o.includes(nq))))) return out;
+  add(data.filter(p => p._nkw.includes(nq)));
+  return out;
+}
+
+function ajnRowHTML(p) {
+  const img = p.hasImage && p.img ? p.img : AJNAV_FALLBACK_IMG;
+  return `<div class="srow" data-part="${esc(p.part)}" role="option">
+    <div class="sthumb"><img src="${esc(img)}" alt="" loading="lazy"></div>
+    <div class="sbody">
+      <span class="sname">${esc(p.partType || 'Part')}</span>
+      <span class="smeta"><span class="spn">${esc(p.part)}</span>${p.brand ? `<span class="sbrand">${esc(p.brand)}</span>` : ''}</span>
+    </div>
+  </div>`;
+}
+
 /* ---------------------------------------------------------------- element */
 
 class AutojetNav extends HTMLElement {
@@ -469,6 +594,7 @@ class AutojetNav extends HTMLElement {
     this._open = null;
     this._hoverTimer = null;
     this._leaveTimer = null;
+    this._searchDDs = [];
   }
 
   connectedCallback() {
@@ -544,6 +670,11 @@ class AutojetNav extends HTMLElement {
     if (this._onKey) document.removeEventListener('keydown', this._onKey);
     this._ro = this._mq = this._sync = this._onDocClick = this._onKey = null;
     this._open = null;
+    this._searchDDs = [];
+  }
+
+  _closeAllQuickSearch() {
+    this._searchDDs.forEach(dd => { dd.removeAttribute('data-open'); dd.innerHTML = ''; });
   }
 
   attributeChangedCallback() { if (this.shadowRoot.childElementCount) this.connectedCallback(); }
@@ -608,7 +739,7 @@ class AutojetNav extends HTMLElement {
         <div class="wrap">
           ${this._logo()}
           <div class="tools">
-            <form class="field" data-bar-search>${ICON.searchGray}<input type="search" placeholder="Search by Part, OE, or Model" aria-label="Search by Part, OE, or Model"></form>
+            <div class="search-wrap"><form class="field" data-bar-search>${ICON.searchGray}<input type="search" placeholder="Search by Part, OE, or Model" aria-label="Search by Part, OE, or Model"></form></div>
             <a class="quote" href="${esc(this.getAttribute('quote-href') || '#')}">Get Quote</a>
           </div>
           <button class="burger" type="button" data-burger aria-label="Open menu" aria-expanded="false">${ICON.burger}</button>
@@ -715,12 +846,16 @@ class AutojetNav extends HTMLElement {
       if (e.key !== 'Escape') return;
       this._closeMenu();
       this._closeSheet();
+      this._closeAllQuickSearch();
     };
     document.addEventListener('keydown', this._onKey);
 
     this._onDocClick = e => {
-      if (e.composedPath().includes(this)) return;
-      this._closeMenu();
+      const path = e.composedPath();
+      if (!path.includes(this)) this._closeMenu();
+      if (!path.some(el => el instanceof Element && el.classList && el.classList.contains('search-wrap'))) {
+        this._closeAllQuickSearch();
+      }
     };
     document.addEventListener('click', this._onDocClick, true);
 
@@ -753,6 +888,83 @@ class AutojetNav extends HTMLElement {
         this.dispatchEvent(new CustomEvent('autojet-search', { detail: { query: q }, bubbles: true, composed: true }));
         window.location.href = `${action}?q=${encodeURIComponent(q)}`;
       });
+    });
+
+    // quick-search dropdown: header bar field + mega-menu "Find your part" tile
+    // field only (not the mobile sheet field, which keeps plain submit-to-/parts).
+    this._searchDDs = [];
+    root.querySelectorAll('form[data-bar-search],form[data-tile-search]').forEach(form => {
+      this._setupQuickSearch(form);
+    });
+  }
+
+  _setupQuickSearch(form) {
+    const wrap = form.closest('.search-wrap');
+    const input = form.querySelector('input');
+    if (!wrap || !input) return;
+
+    const dd = document.createElement('div');
+    dd.className = 'search-dd';
+    dd.setAttribute('role', 'listbox');
+    wrap.appendChild(dd);
+    this._searchDDs.push(dd);
+
+    let hi = -1;
+    let debounceTimer = null;
+    const action = () => this.getAttribute('search-action') || '/parts';
+
+    const close = () => { dd.removeAttribute('data-open'); dd.innerHTML = ''; hi = -1; };
+
+    const go = part => { window.location.href = `${action()}/${encodeURIComponent(part)}`; };
+
+    const render = q => {
+      ajnLoad(data => {
+        const results = ajnSuggest(data, q);
+        hi = -1;
+        if (!results.length) {
+          dd.innerHTML = `<div class="snone">No matches. Press Enter to search all parts for "${esc(q)}".</div>`;
+          dd.setAttribute('data-open', '');
+          return;
+        }
+        dd.innerHTML = results.map(ajnRowHTML).join('')
+          + `<a class="sall" data-see-all href="${esc(action())}?q=${encodeURIComponent(q)}">See all results for "${esc(q)}"</a>`;
+        dd.setAttribute('data-open', '');
+        dd.querySelectorAll('.srow').forEach(row => {
+          row.addEventListener('click', () => go(row.getAttribute('data-part')));
+        });
+      });
+    };
+
+    input.addEventListener('input', () => {
+      const q = input.value.trim();
+      clearTimeout(debounceTimer);
+      if (!q) { close(); return; }
+      debounceTimer = setTimeout(() => render(q), 120);
+    });
+
+    input.addEventListener('focus', () => {
+      const q = input.value.trim();
+      if (q) render(q);
+    });
+
+    input.addEventListener('keydown', e => {
+      const rows = Array.from(dd.querySelectorAll('.srow'));
+      if (e.key === 'ArrowDown' && rows.length) {
+        e.preventDefault();
+        hi = Math.min(hi + 1, rows.length - 1);
+        rows.forEach((r, i) => r.toggleAttribute('data-hi', i === hi));
+        rows[hi].scrollIntoView({ block: 'nearest' });
+      } else if (e.key === 'ArrowUp' && rows.length) {
+        e.preventDefault();
+        hi = Math.max(hi - 1, 0);
+        rows.forEach((r, i) => r.toggleAttribute('data-hi', i === hi));
+        rows[hi].scrollIntoView({ block: 'nearest' });
+      } else if (e.key === 'Enter' && hi >= 0 && rows[hi]) {
+        e.preventDefault();
+        go(rows[hi].getAttribute('data-part'));
+      } else if (e.key === 'Escape') {
+        close();
+      }
     });
   }
 
