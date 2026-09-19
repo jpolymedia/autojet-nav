@@ -37,9 +37,15 @@
  * 3. mobile-breakpoint (default 770) is the point where items ALONE
  *    (phone already relocated to the top bar by the phone tier) still do
  *    not fit. Only below this width does the component switch to the
- *    hamburger: items, the quote button, the top-bar phone, and the search
- *    affordance all move into the mobile sheet, and the whole bottom row
- *    hides.
+ *    hamburger: items, the quote button, and the top-bar phone all move into
+ *    the mobile sheet, and the whole bottom row hides. The search field does
+ *    NOT move into the sheet — it stays visible in the top bar at every
+ *    width below this point, just relaid out: the top bar goes from one row
+ *    (logo, search, quote, phone) to two — logo + hamburger on row one,
+ *    search alone filling the full width of row two — and stays a two-row
+ *    layout the rest of the way down, since the search field's width is a
+ *    percentage and simply keeps scaling with the viewport with no further
+ *    row/column switch needed.
  *    Derivation: 660 (items) + 2*(0.0625*width) = width gives ~754px; 770
  *    adds a small buffer. This value is an initial estimate — confirm
  *    against the real rendered width in the browser and adjust if the
@@ -274,7 +280,7 @@ const ICON = {
   arrow: '<svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="#056EB7" stroke-width="1.6" aria-hidden="true"><path d="M2 7h9M7.5 3.5L11 7l-3.5 3.5"/></svg>',
   chevron: '<svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M1.5 3.5L5 7 8.5 3.5"/></svg>',
   chevronM: '<svg viewBox="0 0 10 10" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M1.5 3.5L5 7 8.5 3.5"/></svg>',
-  burger: '<svg viewBox="0 0 20 20" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 5h16M2 10h16M2 15h16"/></svg>',
+  burger: '<svg viewBox="0 0 20 20" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 5h16M2 10h16M2 15h16"/></svg>',
   close: '<svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 3l14 14M17 3L3 17"/></svg>'
 };
 
@@ -322,7 +328,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .status[data-closed] .state{color:#B4BAC2}
 .bar-top{display:flex;height:69px;box-sizing:border-box}
 .bar-btm{display:flex;height:50px;padding-bottom:4px;border-top:1px solid rgba(255,255,255,.22);border-bottom:3px solid #4DA8F0;box-sizing:border-box}
-.wrap{display:flex;align-items:center;justify-content:space-between;gap:40px;width:100%;max-width:1600px;margin:0 auto;padding:0 clamp(24px, 6.25vw, 80px);box-sizing:border-box}
+.wrap{display:flex;align-items:center;justify-content:space-between;gap:40px;width:100%;max-width:1600px;margin:0 auto;padding:0 clamp(20px, 6.25vw, 80px);box-sizing:border-box}
 .bar-btm .wrap{position:relative;gap:24px}
 .logo{display:block;flex:0 0 auto;width:158px;color:#fff}
 .logo svg{display:block;width:100%;height:auto}
@@ -407,7 +413,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .cta:hover{background:#045a96;color:#fff}
 
 /* mobile */
-.burger{display:none;align-items:center;justify-content:center;width:44px;height:44px;color:#fff;margin-right:-8px}
+.burger{display:none;align-items:center;justify-content:center;width:48px;height:48px;color:#fff;margin-right:-10px}
 .sheet{display:none;position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#fff;color:#333;z-index:9999;flex-direction:column;overscroll-behavior:contain}
 .sheet[open]{display:flex}
 .sheet::backdrop{background:#fff}
@@ -449,14 +455,20 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
  * Get Quote drops before the phone number does */
 :host([data-quote-hidden]) .bar-top .quote{display:none}
 
-:host([data-mobile]) .items,:host([data-mobile]) .bar-top .quote,:host([data-mobile]) .bar-top .field,:host([data-mobile]) .bar-top .util-tel-top{display:none}
+/* hamburger tier: search stays visible throughout, on its own full-width
+ * row below logo + hamburger, rather than disappearing until the sheet
+ * opens. Only Get Quote and the top-bar phone move fully into the sheet. */
+:host([data-mobile]) .items,:host([data-mobile]) .bar-top .quote,:host([data-mobile]) .bar-top .util-tel-top{display:none}
 :host([data-mobile]) .burger{display:flex}
 
-
-:host([data-mobile]) .bar-top{height:66px}
-:host([data-mobile]) .wrap{padding:0 20px}
+:host([data-mobile]) .bar-top{height:auto;padding:12px 0}
+:host([data-mobile]) .bar-top .wrap{flex-wrap:wrap;row-gap:12px}
+:host([data-mobile]) .bar-top .burger{order:1}
+:host([data-mobile]) .bar-top .tools{order:2;flex:1 0 100%;gap:0}
+:host([data-mobile]) .bar-top .search-wrap{width:100%}
+:host([data-mobile]) .bar-top .field{width:100%;max-width:none;height:44px}
 :host([data-mobile]) .bar-btm{display:none}
-:host([data-mobile]) .logo{width:132px}
+:host([data-mobile]) .logo{width:140px}
 `;
 
 /* ---------------------------------------------------------------- markup */
