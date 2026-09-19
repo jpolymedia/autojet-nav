@@ -630,9 +630,23 @@ class AutojetNav extends HTMLElement {
     const quoteBreakpoint = parseInt(this.getAttribute('quote-breakpoint'), 10) || 900;
     const phoneBreakpoint = parseInt(this.getAttribute('phone-breakpoint'), 10) || 960;
     const compactBreakpoint = parseInt(this.getAttribute('compact-breakpoint'), 10) || 1260;
+    // Hysteresis buffer for the mobile-breakpoint edge only. Crossing it hides
+    // or shows the entire bottom items row, which changes the header's height
+    // and therefore the page's height. Right at this edge that can toggle the
+    // page's vertical scrollbar on/off, which changes the viewport's (and
+    // this host's, at 100% width) measured width by the scrollbar's own width
+    // (commonly 15-17px) — enough to cross straight back over an exact-pixel
+    // threshold, flip data-mobile again, change the height again, and toggle
+    // the scrollbar again: a bounce that repeats every resize tick. Requiring
+    // the width to clear the threshold by more than a scrollbar's width
+    // before leaving mobile means the scrollbar's own toggle can never
+    // re-trigger the flip. Only the exit edge needs it — entering mobile at
+    // the exact threshold is a one-way, non-oscillating transition.
+    const mobileExitBuffer = 24;
     this._sync = () => {
       const width = this.getBoundingClientRect().width;
-      if (width > 0 && width <= mobileBreakpoint) {
+      const mobileEdge = this.hasAttribute('data-mobile') ? mobileBreakpoint + mobileExitBuffer : mobileBreakpoint;
+      if (width > 0 && width <= mobileEdge) {
         // true hamburger tier: items alone don't fit even with the phone
         // number already moved out of the bottom row
         this.setAttribute('data-mobile', '');
