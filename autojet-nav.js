@@ -345,7 +345,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .tel a{flex:0 0 auto;font-weight:700;font-size:20px;line-height:1.1;color:#333}
 .tel a:hover{color:#056EB7}
 .callus{font-size:13px;line-height:1.1;color:#5A6069;white-space:nowrap}
-.cta{display:flex;align-items:center;justify-content:center;height:44px;background:#056EB7;border-radius:2px;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#fff}
+.cta{display:flex;align-items:center;justify-content:center;width:260px;height:44px;background:#056EB7;border-radius:2px;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#fff}
 .cta:hover{background:#045a96;color:#fff}
 
 /* mobile */
