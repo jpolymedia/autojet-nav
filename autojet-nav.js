@@ -406,8 +406,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .tile .go{display:flex;align-items:center;justify-content:center;width:46px;height:42px;background:#056EB7;border-radius:0 2px 2px 0}
 .tile .go:hover{background:#045a96}
 .tel{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-bottom:18px}
-.tel-line{display:flex;align-items:center;gap:8px}
-.tel svg{flex:0 0 auto}
+.tel-line{display:flex;align-items:center}
 .tel a{flex:0 0 auto;font-weight:700;font-size:20px;line-height:1.1;color:#333}
 .tel a:hover{color:#056EB7}
 .callus{font-size:13px;line-height:1.1;color:#5A6069}
@@ -429,7 +428,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .tree{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;border-top:1px solid #EDEFF2}
 .trow{display:flex;align-items:center;justify-content:space-between;width:100%;height:52px;padding:0 clamp(20px, 6.25vw, 80px);border-bottom:1px solid #EDEFF2;font-weight:400;font-size:14px;color:#333;text-align:left;box-sizing:border-box}
 .trow .tname{display:flex;align-items:center;flex:1 1 auto;height:100%;color:inherit}
-.trow .tchev{display:flex;align-items:center;justify-content:center;width:52px;height:100%;margin-right:calc(-1 * clamp(20px, 6.25vw, 80px));color:#5A6069;cursor:pointer}
+.trow .tchev{display:flex;align-items:center;justify-content:center;width:36px;height:100%;margin-right:-10px;color:#5A6069;cursor:pointer}
 .trow .tchev svg{transition:transform .12s ease}
 .trow:has([aria-expanded="true"]){background:#F4F6F8;color:#056EB7}
 .trow:has([aria-expanded="true"]) .tchev{color:#056EB7}
@@ -444,7 +443,6 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .sheet-foot .quote{width:100%;justify-content:center;height:50px;font-size:14px}
 .sheet-foot .tel{flex-direction:row;align-items:center;justify-content:center;margin:16px 0 0}
 .sheet-foot .tel a{font-size:20px;color:#056EB7}
-.sheet-foot .tel svg{display:none}
 
 :host([data-compact]) .util-right .status{display:none}
 
@@ -510,7 +508,7 @@ function tileHTML(f, phone) {
   return `<div class="tile">
     <div class="head"><div class="head-row"><span>${esc(f.heading)}</span></div><div class="rule"></div></div>
     <div class="search-wrap"><form class="field" data-tile-search>${ICON.searchGray}<input type="search" placeholder="${esc(f.placeholder)}" aria-label="${esc(f.placeholder)}"></form></div>
-    <div class="tel"><span class="callus">Call Our Team</span><div class="tel-line">${ICON.phone}<a href="tel:${phone.replace(/\D/g, '')}">${esc(phone)}</a></div></div>
+    <div class="tel"><span class="callus">Call Our Team</span><div class="tel-line"><a href="tel:${phone.replace(/\D/g, '')}">${esc(phone)}</a></div></div>
     <a class="cta" href="${esc(f.quoteHref)}">${esc(f.quoteLabel)}</a>
   </div>`;
 }
@@ -864,7 +862,7 @@ class AutojetNav extends HTMLElement {
       <nav class="tree" aria-label="Main">${treeHTML(this._phone)}</nav>
       <div class="sheet-foot">
         <a class="quote" href="${esc(this.getAttribute('quote-href') || '#')}">Get Quote</a>
-        <div class="tel">${ICON.phone}<a href="tel:${this._phone.replace(/\D/g, '')}">${esc(this._phone)}</a></div>
+        <div class="tel"><a href="tel:${this._phone.replace(/\D/g, '')}">${esc(this._phone)}</a></div>
       </div>
     </dialog>`;
   }
