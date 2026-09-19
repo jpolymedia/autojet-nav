@@ -385,7 +385,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .head .rule{width:24px;height:2px}
 .rows{display:flex;flex-direction:column;gap:8px}
 .rows[data-secondary]{gap:8px}
-.row{display:flex;align-items:center;gap:9px;min-height:22px;font-size:15px;line-height:1.35;white-space:nowrap;color:#333}
+.row{display:flex;align-items:center;gap:9px;min-height:22px;font-size:15px;line-height:1.35;color:#333}
 .row:hover{color:#056EB7}
 .row[data-secondary]{font-size:13.5px;color:#4A4F55}
 .row[data-secondary][data-out]{color:#056EB7;font-weight:600}
@@ -401,7 +401,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 /* featured tile */
 .tile{background:#F4F6F8;padding:20px}
 .tile .head{margin-bottom:14px}
-.tile .field{width:260px;margin-bottom:18px}
+.tile .field{width:100%;max-width:260px;margin-bottom:18px}
 .tile .go{display:flex;align-items:center;justify-content:center;width:46px;height:42px;background:#056EB7;border-radius:0 2px 2px 0}
 .tile .go:hover{background:#045a96}
 .tel{display:flex;align-items:baseline;gap:8px;margin-bottom:18px}
@@ -409,7 +409,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .tel a{flex:0 0 auto;font-weight:700;font-size:20px;line-height:1.1;color:#333}
 .tel a:hover{color:#056EB7}
 .callus{font-size:13px;line-height:1.1;color:#5A6069;white-space:nowrap}
-.cta{display:flex;align-items:center;justify-content:center;width:260px;height:44px;background:#056EB7;border-radius:2px;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#fff}
+.cta{display:flex;align-items:center;justify-content:center;width:100%;max-width:260px;height:44px;background:#056EB7;border-radius:2px;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#fff}
 .cta:hover{background:#045a96;color:#fff}
 
 /* mobile */
@@ -445,6 +445,25 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .sheet-foot .tel svg{display:none}
 
 :host([data-compact]) .util-right .status{display:none}
+
+/* compact-tier mega panel: three text columns plus the Find Your Part tile
+   no longer fit side by side once the host drops under ~1260px. Bus Brands
+   stacks above Systems in one column so Download PDF Catalogs keeps a real
+   column of its own, and the tile drops out — the header already carries
+   the phone number (and Get Quote, except in the narrow band below) at
+   every compact width, so a second phone/quote block here is redundant. */
+:host([data-compact]) .grid{grid-template-columns:1fr 1fr;grid-template-areas:"c1 c3" "c2 c3";column-gap:40px;row-gap:28px}
+:host([data-compact]) .grid > .col:nth-of-type(1){grid-area:c1}
+:host([data-compact]) .grid > .col:nth-of-type(2){grid-area:c2}
+:host([data-compact]) .grid > .col:nth-of-type(3){grid-area:c3}
+:host([data-compact]) .grid > .tile{display:none}
+
+/* except in the quote-hidden band (900px down to the mobile breakpoint):
+   Get Quote isn't in the header there, so the tile comes back as a
+   full-width row underneath for its CTA button rather than a third
+   cramped column. */
+:host([data-quote-hidden]) .grid{grid-template-areas:"c1 c3" "c2 c3" "tile tile"}
+:host([data-quote-hidden]) .grid > .tile{display:block}
 
 /* phone-top tier: phone number moves from the bottom row up to the top bar,
  * next to Get Quote */
@@ -676,6 +695,10 @@ class AutojetNav extends HTMLElement {
         this.removeAttribute('data-compact');
         this.removeAttribute('data-phone-top');
         this.removeAttribute('data-quote-hidden');
+        // items (and the mega panels/dropdowns they open) are hidden at this
+        // tier in favor of the hamburger sheet — close any panel left open
+        // from a wider width so it can't render orphaned behind the burger
+        this._closeMenu();
       } else if (width > 0 && width <= phoneBreakpoint) {
         // phone-top tier: items + phone together no longer fit the bottom
         // row, so the phone number moves up next to Get Quote and the
