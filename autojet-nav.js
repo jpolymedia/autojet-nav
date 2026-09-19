@@ -361,8 +361,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 /* featured tile */
 .tile{background:#F4F6F8;padding:20px}
 .tile .head{margin-bottom:14px}
-.tile .shot{display:flex;align-items:center;justify-content:center;height:104px;background:#E9ECEF;border:1px solid #DFE3E7;font-size:11px;color:#5A6069;margin-bottom:18px}
-.tile .field{width:100%;margin-bottom:18px}
+.tile .field{width:260px;margin-bottom:18px}
 .tile .go{display:flex;align-items:center;justify-content:center;width:46px;height:42px;background:#056EB7;border-radius:0 2px 2px 0}
 .tile .go:hover{background:#045a96}
 .tel{display:flex;align-items:baseline;gap:8px;margin-bottom:18px}
@@ -434,7 +433,6 @@ function rowHTML(it, secondary) {
 
 function tileHTML(f, phone) {
   return `<div class="tile">
-    <div class="shot">product photo</div>
     <div class="head"><div class="head-row"><span>${esc(f.heading)}</span></div><div class="rule"></div></div>
     <div class="search-wrap"><form class="field" data-tile-search>${ICON.searchGray}<input type="search" placeholder="${esc(f.placeholder)}" aria-label="${esc(f.placeholder)}"></form></div>
     <div class="tel">${ICON.phone}<a href="tel:${phone.replace(/\D/g, '')}">${esc(phone)}</a><span class="callus">Call Our Team</span></div>
