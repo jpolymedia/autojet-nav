@@ -1,41 +1,58 @@
 /* Auto-jet navigation — Wix Studio Custom Element
  * Tag: <autojet-nav>
  * Attributes: logo-src, logo-href, phone, quote-href, search-action,
- * compact-breakpoint, mobile-breakpoint
+ * compact-breakpoint, phone-breakpoint, mobile-breakpoint
  *
- * TWO-TIER RESPONSIVE COLLAPSE. The bottom row (nav items + hours status +
- * phone) does not drop to the hamburger menu all at once. There are two
- * independent width thresholds:
+ * THREE-TIER RESPONSIVE COLLAPSE. The bottom row (nav items + hours status +
+ * phone) does not drop to the hamburger menu all at once. There are three
+ * independent width thresholds, each one dropping a little more before the
+ * hamburger is ever needed:
  *
  * 1. compact-breakpoint (default 1260) is the point where the FULL bottom
  *    row (items + hours/status + phone) stops fitting. Below this width the
  *    component adds [data-compact]: the "Open Now / Closes 5 PM CT" status
- *    text hides (the phone number itself stays put). Nav items, the phone
- *    number, and the top-bar search field all stay visible in place through
- *    this whole tier — this buys room so the hamburger does not have to
- *    appear yet. The search field has its own headroom at every width down
- *    to the mobile tier and doesn't need to change here.
+ *    text hides (the phone number itself stays put, still in the bottom
+ *    row). Nav items, the phone number, and the top-bar search field all
+ *    stay visible in place through this whole tier — this buys room so the
+ *    hamburger does not have to appear yet. The search field has its own
+ *    headroom at every width down to the mobile tier and doesn't need to
+ *    change here.
  *    Derivation: the 8 top-level items need ~660px unconstrained, the
  *    status+phone block is a fixed 404px, the row gap is 24px, and the
  *    wrap's side padding is clamp(24px, 6.25vw, 80px) per side. Solving
  *    width = 660 + 24 + 404 + 2*(0.0625*width) gives ~1244px as the exact
  *    overlap point; 1260 adds a small buffer.
  *
- * 2. mobile-breakpoint (default 960) is the point where items + phone ALONE
- *    (status already hidden by the compact tier) still do not fit. Only
- *    below this width does the component switch to the hamburger: items,
- *    the quote button, and the search affordance all move into the mobile
- *    sheet, and the whole bottom row hides.
- *    Derivation: 660 (items) + 24 (gap) + 140 (phone block alone, no
- *    status) + 2*(0.0625*width) = width gives ~942px; 960 adds a small
- *    buffer.
+ * 2. phone-breakpoint (default 960) is the point where items + phone
+ *    TOGETHER (status already hidden by the compact tier) stop fitting the
+ *    bottom row. Below this width the component adds [data-phone-top] (on
+ *    top of [data-compact], which stays set): the phone number moves out of
+ *    the bottom row entirely and reappears in the top bar, to the right of
+ *    Get Quote (.util-tel-top). The bottom row now carries nav items alone,
+ *    which buys another tier of room before the hamburger.
+ *    Derivation: this is the same math the old single mobile-breakpoint
+ *    used — 660 (items) + 24 (gap) + 140 (phone block alone, no status) +
+ *    2*(0.0625*width) = width gives ~942px; 960 adds a small buffer.
+ *
+ * 3. mobile-breakpoint (default 770) is the point where items ALONE
+ *    (phone already relocated to the top bar by the phone tier) still do
+ *    not fit. Only below this width does the component switch to the
+ *    hamburger: items, the quote button, the top-bar phone, and the search
+ *    affordance all move into the mobile sheet, and the whole bottom row
+ *    hides.
+ *    Derivation: 660 (items) + 2*(0.0625*width) = width gives ~754px; 770
+ *    adds a small buffer. This value (and headroom for .util-tel-top in the
+ *    top bar's .tools row once the phone moves up there) is an initial
+ *    estimate — confirm against the real rendered width in the browser and
+ *    adjust if the items row wraps or the top bar crowds before this point.
  *
  * If the NAV array below changes (an item added/removed/renamed), or the
  * phone/status block widths change, re-measure the real item row's width
- * (nav.shadowRoot.querySelector('.items').scrollWidth with data-mobile and
- * data-compact forced off) and recompute BOTH thresholds — don't just nudge
- * these numbers by feel, or the tiers drift out of sync with what the
- * content actually needs, which is the bug this replaced.
+ * (nav.shadowRoot.querySelector('.items').scrollWidth with data-mobile,
+ * data-compact, and data-phone-top forced off) and recompute ALL THREE
+ * thresholds — don't just nudge these numbers by feel, or the tiers drift
+ * out of sync with what the content actually needs, which is the bug this
+ * replaced.
  *
  * RESPONSIVE MEASUREMENT: the mobile/compact/desktop switch watches this
  * element's own rendered width (ResizeObserver on `this`), not
@@ -280,6 +297,12 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .util-tel svg{flex:0 0 auto}
 .util-tel:hover{color:#fff}
 .util-tel:hover svg{fill:#fff}
+/* top-bar phone: hidden by default, shown only in the phone-top tier (see
+ * [data-phone-top] below), to the right of Get Quote */
+.util-tel-top{display:none;align-items:center;gap:6px;flex:0 0 auto;font-weight:700;font-size:15px;color:#4DA8F0;white-space:nowrap}
+.util-tel-top svg{flex:0 0 auto}
+.util-tel-top:hover{color:#fff}
+.util-tel-top:hover svg{fill:#fff}
 .status{display:flex;align-items:center;justify-content:center;gap:7px;flex:0 0 auto;width:250px}
 .status .dot{flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:#4ED07A}
 .status .state{font-weight:700;font-size:14px;color:#fff}
@@ -406,7 +429,12 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 
 :host([data-compact]) .util-right .status{display:none}
 
-:host([data-mobile]) .items,:host([data-mobile]) .bar-top .quote,:host([data-mobile]) .bar-top .field{display:none}
+/* phone-top tier: phone number moves from the bottom row up to the top bar,
+ * next to Get Quote */
+:host([data-phone-top]) .bar-btm .util-tel{display:none}
+:host([data-phone-top]) .bar-top .util-tel-top{display:flex}
+
+:host([data-mobile]) .items,:host([data-mobile]) .bar-top .quote,:host([data-mobile]) .bar-top .field,:host([data-mobile]) .bar-top .util-tel-top{display:none}
 :host([data-mobile]) .burger{display:flex}
 
 
@@ -608,23 +636,36 @@ class AutojetNav extends HTMLElement {
     // error unless the console was checked. Running this first, and wrapping
     // _wire() in try/catch, means a future _wire() bug can degrade menu clicks
     // without ever again taking down responsiveness with it.
-    const mobileBreakpoint = parseInt(this.getAttribute('mobile-breakpoint'), 10) || 960;
+    const mobileBreakpoint = parseInt(this.getAttribute('mobile-breakpoint'), 10) || 770;
+    const phoneBreakpoint = parseInt(this.getAttribute('phone-breakpoint'), 10) || 960;
     const compactBreakpoint = parseInt(this.getAttribute('compact-breakpoint'), 10) || 1260;
     this._sync = () => {
       const width = this.getBoundingClientRect().width;
       if (width > 0 && width <= mobileBreakpoint) {
-        // true hamburger tier: items + phone alone don't fit either
+        // true hamburger tier: items alone don't fit even with the phone
+        // number already moved out of the bottom row
         this.setAttribute('data-mobile', '');
         this.removeAttribute('data-compact');
+        this.removeAttribute('data-phone-top');
+      } else if (width > 0 && width <= phoneBreakpoint) {
+        // phone-top tier: items + phone together no longer fit the bottom
+        // row, so the phone number moves up next to Get Quote and the
+        // bottom row carries items alone. Status/hours stays hidden here too.
+        this.removeAttribute('data-mobile');
+        this.setAttribute('data-compact', '');
+        this.setAttribute('data-phone-top', '');
+        this._closeSheet();
       } else if (width > 0 && width <= compactBreakpoint) {
         // compact tier: drop the hours/status text first, before ever
         // reaching for the hamburger
         this.removeAttribute('data-mobile');
         this.setAttribute('data-compact', '');
+        this.removeAttribute('data-phone-top');
         this._closeSheet();
       } else {
         this.removeAttribute('data-mobile');
         this.removeAttribute('data-compact');
+        this.removeAttribute('data-phone-top');
         this._closeSheet();
       }
     };
@@ -739,6 +780,7 @@ class AutojetNav extends HTMLElement {
           <div class="tools">
             <div class="search-wrap"><form class="field" data-bar-search>${ICON.searchGray}<input type="search" placeholder="Search by Part, OE, or Model" aria-label="Search by Part, OE, or Model"></form></div>
             <a class="quote" href="${esc(this.getAttribute('quote-href') || '#')}">Get Quote</a>
+            <a class="util-tel-top" href="tel:${this._phone.replace(/\D/g, '')}">${ICON.phoneSm}${esc(this._phone)}</a>
           </div>
           <button class="burger" type="button" data-burger aria-label="Open menu" aria-expanded="false">${ICON.burger}</button>
         </div>
