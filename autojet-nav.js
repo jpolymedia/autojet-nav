@@ -401,7 +401,8 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 /* featured tile */
 .tile{background:#F4F6F8;padding:20px}
 .tile .head{margin-bottom:14px}
-.tile .field{width:100%;max-width:260px;margin-bottom:18px}
+.tile .search-wrap{display:block;width:100%}
+.tile .field{width:100%;max-width:260px;margin-bottom:18px;box-sizing:border-box}
 .tile .go{display:flex;align-items:center;justify-content:center;width:46px;height:42px;background:#056EB7;border-radius:0 2px 2px 0}
 .tile .go:hover{background:#045a96}
 .tel{display:flex;align-items:baseline;gap:8px;margin-bottom:18px}
@@ -417,11 +418,11 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .sheet{display:none;position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#fff;color:#333;z-index:9999;flex-direction:column;overscroll-behavior:contain}
 .sheet[open]{display:flex}
 .sheet::backdrop{background:#fff}
-.sheet-bar{display:flex;align-items:center;justify-content:space-between;height:72px;padding:0 20px;background:#1A1A1A;flex:0 0 auto}
+.sheet-bar{display:flex;align-items:center;justify-content:space-between;height:72px;padding:0 clamp(20px, 6.25vw, 80px);background:#1A1A1A;flex:0 0 auto;box-sizing:border-box}
 .sheet-bar .logo{width:132px}
 .sheet-x{color:#fff}
 .sheet-x{display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin-right:-10px}
-.sheet-search{padding:16px 20px;flex:0 0 auto}
+.sheet-search{padding:16px clamp(20px, 6.25vw, 80px);flex:0 0 auto;box-sizing:border-box}
 .sheet-search .field{width:100%;max-width:none;height:46px}
 .sheet-search input{font-size:14px}
 .tree{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;border-top:1px solid #EDEFF2}
@@ -438,7 +439,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .tsub .tlabel:not(:first-child){margin-top:6px}
 .tlink{display:flex;align-items:center;gap:9px;min-height:22px;line-height:1.35;font-size:14px;color:#333}
 .tlink[data-bold]{font-weight:700}
-.sheet-foot{flex:0 0 auto;padding:20px 20px 24px}
+.sheet-foot{flex:0 0 auto;padding:20px clamp(20px, 6.25vw, 80px) 24px;box-sizing:border-box}
 .sheet-foot .quote{width:100%;justify-content:center;height:50px;font-size:14px}
 .sheet-foot .tel{align-items:center;justify-content:center;margin:16px 0 0}
 .sheet-foot .tel a{font-size:20px;color:#056EB7}
@@ -448,21 +449,20 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 
 /* compact-tier mega panel: three text columns plus the Find Your Part tile
    no longer fit side by side once the host drops under ~1260px. Bus Brands
-   stacks above Systems in one column so Download PDF Catalogs keeps a real
-   column of its own, and the tile drops out — the header already carries
-   the phone number (and Get Quote, except in the narrow band below) at
-   every compact width, so a second phone/quote block here is redundant. */
-:host([data-compact]) .grid{grid-template-columns:1fr 1fr;grid-template-areas:"c1 c3" "c2 c3";column-gap:40px;row-gap:28px}
+   stacks above Systems in one column so Download PDF Catalogs and the tile
+   each keep a real column of their own — the tile's own field/button now
+   shrink with their column (see .tile .search-wrap/.field below) instead of
+   overflowing it. */
+:host([data-compact]) .grid{grid-template-columns:1fr 1fr 1fr;grid-template-areas:"c1 c3 tile" "c2 c3 tile";column-gap:32px;row-gap:28px}
 :host([data-compact]) .grid > .col:nth-of-type(1){grid-area:c1}
 :host([data-compact]) .grid > .col:nth-of-type(2){grid-area:c2}
 :host([data-compact]) .grid > .col:nth-of-type(3){grid-area:c3}
-:host([data-compact]) .grid > .tile{display:none}
+:host([data-compact]) .grid > .tile{grid-area:tile}
 
-/* except in the quote-hidden band (900px down to the mobile breakpoint):
-   Get Quote isn't in the header there, so the tile comes back as a
-   full-width row underneath for its CTA button rather than a third
-   cramped column. */
-:host([data-quote-hidden]) .grid{grid-template-areas:"c1 c3" "c2 c3" "tile tile"}
+/* in the quote-hidden band (900px down to the mobile breakpoint) the panel
+   itself is narrower still, so the tile drops to a full-width row below
+   the two text columns instead of squeezing into a third one. */
+:host([data-quote-hidden]) .grid{grid-template-columns:1fr 1fr;grid-template-areas:"c1 c3" "c2 c3" "tile tile"}
 :host([data-quote-hidden]) .grid > .tile{display:block}
 
 /* phone-top tier: phone number moves from the bottom row up to the top bar,
