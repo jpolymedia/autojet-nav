@@ -1,10 +1,10 @@
 /* Auto-jet navigation — Wix Studio Custom Element
  * Tag: <autojet-nav>
  * Attributes: logo-src, logo-href, phone, quote-href, search-action,
- * compact-breakpoint, phone-breakpoint, mobile-breakpoint
+ * compact-breakpoint, phone-breakpoint, quote-breakpoint, mobile-breakpoint
  *
- * THREE-TIER RESPONSIVE COLLAPSE. The bottom row (nav items + hours status +
- * phone) does not drop to the hamburger menu all at once. There are three
+ * FOUR-TIER RESPONSIVE COLLAPSE. The bottom row (nav items + hours status +
+ * phone) does not drop to the hamburger menu all at once. There are four
  * independent width thresholds, each one dropping a little more before the
  * hamburger is ever needed:
  *
@@ -41,16 +41,29 @@
  *    affordance all move into the mobile sheet, and the whole bottom row
  *    hides.
  *    Derivation: 660 (items) + 2*(0.0625*width) = width gives ~754px; 770
- *    adds a small buffer. This value (and headroom for .util-tel-top in the
- *    top bar's .tools row once the phone moves up there) is an initial
- *    estimate — confirm against the real rendered width in the browser and
- *    adjust if the items row wraps or the top bar crowds before this point.
+ *    adds a small buffer. This value is an initial estimate — confirm
+ *    against the real rendered width in the browser and adjust if the
+ *    items row wraps before this point.
+ *
+ * quote-breakpoint (default 900) is nested INSIDE the phone tier (it only
+ * ever applies between mobile-breakpoint and phone-breakpoint): once the top
+ * bar itself (logo + search field + Get Quote + the relocated phone number)
+ * runs out of room, the component adds [data-quote-hidden] and Get Quote
+ * drops from the top bar first, ahead of the phone number — Auto-jet's
+ * sales close by phone, not the quote form, so the phone stays and Get Quote
+ * remains reachable via the mega-menu tile CTAs and the Contact nav link
+ * until the hamburger tier recovers it in the mobile sheet footer.
+ * Derivation: logo 158 + wrap gap 40 + tools row (search 260 + gap 14 +
+ * quote 140 + gap 14 + phone ~140) + 2*(0.0625*width) side padding gives a
+ * rough overlap in the 810-925px range depending on where the clamped
+ * padding sits; 900 is a starting estimate — confirm live and adjust.
  *
  * If the NAV array below changes (an item added/removed/renamed), or the
- * phone/status block widths change, re-measure the real item row's width
- * (nav.shadowRoot.querySelector('.items').scrollWidth with data-mobile,
- * data-compact, and data-phone-top forced off) and recompute ALL THREE
- * thresholds — don't just nudge these numbers by feel, or the tiers drift
+ * phone/status/quote block widths change, re-measure the real item row's
+ * width (nav.shadowRoot.querySelector('.items').scrollWidth with
+ * data-mobile, data-compact, data-phone-top, and data-quote-hidden forced
+ * off) and recompute ALL FOUR thresholds — don't just nudge these numbers
+ * by feel, or the tiers drift
  * out of sync with what the content actually needs, which is the bug this
  * replaced.
  *
@@ -432,6 +445,10 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 :host([data-phone-top]) .bar-btm .util-tel{display:none}
 :host([data-phone-top]) .bar-top .util-tel-top{display:flex}
 
+/* within the phone-top tier, once the top bar itself runs out of room,
+ * Get Quote drops before the phone number does */
+:host([data-quote-hidden]) .bar-top .quote{display:none}
+
 :host([data-mobile]) .items,:host([data-mobile]) .bar-top .quote,:host([data-mobile]) .bar-top .field,:host([data-mobile]) .bar-top .util-tel-top{display:none}
 :host([data-mobile]) .burger{display:flex}
 
@@ -635,6 +652,7 @@ class AutojetNav extends HTMLElement {
     // _wire() in try/catch, means a future _wire() bug can degrade menu clicks
     // without ever again taking down responsiveness with it.
     const mobileBreakpoint = parseInt(this.getAttribute('mobile-breakpoint'), 10) || 770;
+    const quoteBreakpoint = parseInt(this.getAttribute('quote-breakpoint'), 10) || 900;
     const phoneBreakpoint = parseInt(this.getAttribute('phone-breakpoint'), 10) || 960;
     const compactBreakpoint = parseInt(this.getAttribute('compact-breakpoint'), 10) || 1260;
     this._sync = () => {
@@ -645,6 +663,7 @@ class AutojetNav extends HTMLElement {
         this.setAttribute('data-mobile', '');
         this.removeAttribute('data-compact');
         this.removeAttribute('data-phone-top');
+        this.removeAttribute('data-quote-hidden');
       } else if (width > 0 && width <= phoneBreakpoint) {
         // phone-top tier: items + phone together no longer fit the bottom
         // row, so the phone number moves up next to Get Quote and the
@@ -653,17 +672,26 @@ class AutojetNav extends HTMLElement {
         this.setAttribute('data-compact', '');
         this.setAttribute('data-phone-top', '');
         this._closeSheet();
+        // Within this tier, once the top bar itself (logo + search + Get
+        // Quote + phone) runs out of room, Get Quote drops before the phone
+        // number does — Auto-jet's sales close by phone, not the quote
+        // form, and Get Quote stays reachable via the mega-menu tile CTAs
+        // and the Contact nav link at this width.
+        if (width <= quoteBreakpoint) this.setAttribute('data-quote-hidden', '');
+        else this.removeAttribute('data-quote-hidden');
       } else if (width > 0 && width <= compactBreakpoint) {
         // compact tier: drop the hours/status text first, before ever
         // reaching for the hamburger
         this.removeAttribute('data-mobile');
         this.setAttribute('data-compact', '');
         this.removeAttribute('data-phone-top');
+        this.removeAttribute('data-quote-hidden');
         this._closeSheet();
       } else {
         this.removeAttribute('data-mobile');
         this.removeAttribute('data-compact');
         this.removeAttribute('data-phone-top');
+        this.removeAttribute('data-quote-hidden');
         this._closeSheet();
       }
     };
