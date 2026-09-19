@@ -95,7 +95,7 @@ const NAV = [
     label: 'School Bus', href: '/school-bus', type: 'mega',
     columns: [
       {
-        heading: 'Parts by bus brand',
+        heading: 'Bus Brand',
         items: [
           { label: 'Blue Bird', href: '/blue-bird-school-bus-exhaust-parts' },
           // Chevrolet-GMC and Ford have no dedicated hub page; routed to /truck per
@@ -111,7 +111,7 @@ const NAV = [
         ]
       },
       {
-        heading: 'Parts by system',
+        heading: 'System',
         items: [
           { label: 'DPF and Emissions', href: '/dpf-and-emissions' },
           { label: 'Catalytic Converters and Mufflers', href: '/catalytic-converters-and-mufflers' },
@@ -148,7 +148,7 @@ const NAV = [
     label: 'Truck', href: '/truck', type: 'mega',
     columns: [
       {
-        heading: 'Parts by truck brand',
+        heading: 'Truck Brand',
         items: [
           // No truck brand pages exist yet. Routed to /truck as an interim
           // stopgap, not a PDF, until dedicated truck brand pages are built.
@@ -169,7 +169,7 @@ const NAV = [
         ]
       },
       {
-        heading: 'Parts by system',
+        heading: 'System',
         items: [
           // Truck has no vehicle-specific pages yet; DPF and Catalytic share
           // the generic system pages until the truck versions ship. Performance
