@@ -134,10 +134,10 @@ const NAV = [
         heading: 'Bus Brands',
         items: [
           { label: 'Blue Bird', href: '/blue-bird-school-bus-exhaust-parts' },
-          // Chevrolet-GMC hub published 2026-10-15. Ford still has no dedicated
-          // hub page, so it stays on /truck per the 2026-09-11 redirect decision.
+          // Ford hub published 2026-10-15, so this entry no longer routes to /truck.
+          // The Truck menu Ford entry stays on /truck because no truck brand pages exist.
           { label: 'Chevrolet-GMC', href: '/gm-chevrolet-school-bus-exhaust-parts' },
-          { label: 'Ford', href: '/truck' },
+          { label: 'Ford', href: '/ford-school-bus-exhaust-parts' },
           { label: 'Freightliner', href: '/freightliner-school-bus-exhaust-parts' },
           { label: 'IC Bus', href: '/ic-bus-school-bus-exhaust-parts' },
           // International hub published 2026-10-15, so this entry no longer routes to IC Bus.
