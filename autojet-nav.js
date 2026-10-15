@@ -140,9 +140,9 @@ const NAV = [
           { label: 'Ford', href: '/truck' },
           { label: 'Freightliner', href: '/freightliner-school-bus-exhaust-parts' },
           { label: 'IC Bus', href: '/ic-bus-school-bus-exhaust-parts' },
-          // Navistar/International has no dedicated hub page; routed to IC Bus,
-          // which runs the Navistar chassis (same target used in the 2026-09-11 redirect).
-          { label: 'Navistar International', href: '/ic-bus-school-bus-exhaust-parts' },
+          // International hub published 2026-10-15, so this entry no longer routes to IC Bus.
+          // The IC Bus hub still covers IC Bus buses built on the Navistar chassis.
+          { label: 'Navistar International', href: '/international-school-bus-exhaust-parts' },
           { label: 'Thomas Built', href: '/thomas-built-school-bus-exhaust-parts' }
         ]
       },
