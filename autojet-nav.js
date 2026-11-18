@@ -107,8 +107,10 @@
  * Thomas, Freightliner. The brand and system columns and the catalog column all
  * derive from that list, so nav, catalog and PDFs never diverge.
  *
- * Both vehicle panels use the SAME three columns in the same order:
- *   1 Parts by <vehicle> brand   2 Parts by system   3 Download PDF Catalogs
+ * Both vehicle panels use the SAME four columns in the same order:
+ *   1 Download PDF Catalogs   2 Parts by <vehicle> brand   3 Parts by system   4 Cross-Reference
+ * (2026-11-18: PDF catalogs moved first because mechanics work from the print catalog's
+ * section pages. Cross-reference hubs added as the fourth column.)
  * Brand links are bare brand names (the heading already says "brand"), and each
  * no column carries an overview row: the parent nav item already goes there.
  * PDF hosts differ by division on purpose: School Bus rows use the auto-jet.com
@@ -130,6 +132,21 @@ const NAV = [
   {
     label: 'School Bus', href: '/school-bus', type: 'mega',
     columns: [
+      {
+        heading: 'Download PDF Catalogs', secondary: true,
+        items: [
+          { label: 'School Bus Catalog', href: 'https://www.auto-jet.com/_files/ugd/3978df_c9854d9dabef456581bb3f5983c4488e.pdf?index=true', bold: true, pdf: true },
+          { label: 'Accessories', href: 'https://www.auto-jet.com/_files/ugd/3978df_96b767f23abd4dff8626aafe0a7961d6.pdf?index=true', pdf: true },
+          { label: 'Blue Bird', href: 'https://www.auto-jet.com/_files/ugd/3978df_6dbdead6404145cebe986f8287086671.pdf?index=true', pdf: true },
+          { label: 'Chevrolet-GMC', href: 'https://www.auto-jet.com/_files/ugd/3978df_bf3f5d93eb0448f9a509b62589ec7830.pdf?index=true', pdf: true },
+          { label: 'Converters & Mufflers', href: 'https://www.auto-jet.com/_files/ugd/3978df_843d7ab810c049db92382bd066e7f01e.pdf?index=true', pdf: true },
+          { label: 'DPF', href: 'https://www.auto-jet.com/_files/ugd/3978df_8db1639b462b4ef5b34ddcc5a49b39c6.pdf?index=true', pdf: true },
+          { label: 'Ford', href: 'https://www.auto-jet.com/_files/ugd/3978df_26970388efc04bba8c3c252909f97c0d.pdf?index=true', pdf: true },
+          { label: 'Freightliner', href: 'https://www.auto-jet.com/_files/ugd/3978df_c4a92aacb83e4c07979ca0ffd8f248eb.pdf?index=true', pdf: true },
+          { label: 'Navistar International', href: 'https://www.auto-jet.com/_files/ugd/3978df_57f0cde034894b7a943d42cbd848ef28.pdf', pdf: true },
+          { label: 'Thomas Built', href: 'https://www.auto-jet.com/_files/ugd/3978df_d1256cdb76ef4885b34d5f3d49332a4c.pdf?index=true', pdf: true }
+        ]
+      },
       {
         heading: 'Bus Brands',
         items: [
@@ -157,18 +174,10 @@ const NAV = [
         ]
       },
       {
-        heading: 'Download PDF Catalogs', secondary: true,
+        heading: 'Cross-Reference',
         items: [
-          { label: 'School Bus Catalog', href: 'https://www.auto-jet.com/_files/ugd/3978df_c9854d9dabef456581bb3f5983c4488e.pdf?index=true', bold: true, pdf: true },
-          { label: 'Accessories', href: 'https://www.auto-jet.com/_files/ugd/3978df_96b767f23abd4dff8626aafe0a7961d6.pdf?index=true', pdf: true },
-          { label: 'Blue Bird', href: 'https://www.auto-jet.com/_files/ugd/3978df_6dbdead6404145cebe986f8287086671.pdf?index=true', pdf: true },
-          { label: 'Chevrolet-GMC', href: 'https://www.auto-jet.com/_files/ugd/3978df_bf3f5d93eb0448f9a509b62589ec7830.pdf?index=true', pdf: true },
-          { label: 'Converters & Mufflers', href: 'https://www.auto-jet.com/_files/ugd/3978df_843d7ab810c049db92382bd066e7f01e.pdf?index=true', pdf: true },
-          { label: 'DPF', href: 'https://www.auto-jet.com/_files/ugd/3978df_8db1639b462b4ef5b34ddcc5a49b39c6.pdf?index=true', pdf: true },
-          { label: 'Ford', href: 'https://www.auto-jet.com/_files/ugd/3978df_26970388efc04bba8c3c252909f97c0d.pdf?index=true', pdf: true },
-          { label: 'Freightliner', href: 'https://www.auto-jet.com/_files/ugd/3978df_c4a92aacb83e4c07979ca0ffd8f248eb.pdf?index=true', pdf: true },
-          { label: 'Navistar International', href: 'https://www.auto-jet.com/_files/ugd/3978df_57f0cde034894b7a943d42cbd848ef28.pdf', pdf: true },
-          { label: 'Thomas Built', href: 'https://www.auto-jet.com/_files/ugd/3978df_d1256cdb76ef4885b34d5f3d49332a4c.pdf?index=true', pdf: true }
+          { label: 'School Bus Cross-Reference', href: '/school-bus-cross-reference' },
+          { label: 'DPF Cross-Reference', href: '/dpf-cross-reference' }
         ]
       }
     ]
@@ -177,6 +186,23 @@ const NAV = [
   {
     label: 'Truck', href: '/truck', type: 'mega',
     columns: [
+      {
+        heading: 'Download PDF Catalogs', secondary: true,
+        items: [
+          { label: 'Truck Catalog', href: 'https://www.auto-jet.com/_files/ugd/3978df_121a7e754f2448c2b031c6caedb82b2e.pdf?index=true', bold: true, pdf: true },
+          { label: 'Accessories', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_872c682e617749b0870031c4fd48148a.pdf', pdf: true },
+          { label: 'Chevrolet-GMC', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_1199d42a933d44eca1c6d0098e7ddf6d.pdf', pdf: true },
+          { label: 'Crossover', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_3273b0cda0dc47caa0b91a58d58929dd.pdf', pdf: true },
+          { label: 'Emission Control', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_84358508fd8e41f1bcc146eba4a33f0f.pdf', pdf: true },
+          { label: 'Ford', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_a2a9e1966089407896bcb941a8cd7320.pdf', pdf: true },
+          { label: 'Freightliner', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_33525896d14940349da522216a8e8536.pdf', pdf: true },
+          { label: 'Mufflers', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_3fac61dde47b4087b4223bf8bfc94a53.pdf', pdf: true },
+          { label: 'Navistar International', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_aff7fd91fee341e992c6bb99d53d2d4b.pdf', pdf: true },
+          { label: 'Performance', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_1a36d6e3b86b4e5c847456bf19688c06.pdf', pdf: true },
+          // the six vintage files live on their own archive page
+          { label: 'Vintage & Discontinued', href: '/vintage-and-discontinued', pdf: true }
+        ]
+      },
       {
         heading: 'Truck Brands',
         items: [
@@ -213,20 +239,10 @@ const NAV = [
         ]
       },
       {
-        heading: 'Download PDF Catalogs', secondary: true,
+        heading: 'Cross-Reference',
         items: [
-          { label: 'Truck Catalog', href: 'https://www.auto-jet.com/_files/ugd/3978df_121a7e754f2448c2b031c6caedb82b2e.pdf?index=true', bold: true, pdf: true },
-          { label: 'Accessories', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_872c682e617749b0870031c4fd48148a.pdf', pdf: true },
-          { label: 'Chevrolet-GMC', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_1199d42a933d44eca1c6d0098e7ddf6d.pdf', pdf: true },
-          { label: 'Crossover', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_3273b0cda0dc47caa0b91a58d58929dd.pdf', pdf: true },
-          { label: 'Emission Control', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_84358508fd8e41f1bcc146eba4a33f0f.pdf', pdf: true },
-          { label: 'Ford', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_a2a9e1966089407896bcb941a8cd7320.pdf', pdf: true },
-          { label: 'Freightliner', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_33525896d14940349da522216a8e8536.pdf', pdf: true },
-          { label: 'Mufflers', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_3fac61dde47b4087b4223bf8bfc94a53.pdf', pdf: true },
-          { label: 'Navistar International', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_aff7fd91fee341e992c6bb99d53d2d4b.pdf', pdf: true },
-          { label: 'Performance', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_1a36d6e3b86b4e5c847456bf19688c06.pdf', pdf: true },
-          // the six vintage files live on their own archive page
-          { label: 'Vintage & Discontinued', href: '/vintage-and-discontinued', pdf: true }
+          { label: 'Truck Exhaust Cross-Reference', href: '/truck-exhaust-cross-reference' },
+          { label: 'DPF Cross-Reference', href: '/dpf-cross-reference' }
         ]
       }
     ]
@@ -369,6 +385,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .panel{position:absolute;left:0;right:0;top:100%;background:#fff;box-shadow:0 10px 18px -12px rgba(0,0,0,.14);display:none;z-index:1}
 .panel[data-open]{display:block}
 .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:40px;width:100%;max-width:1600px;margin:0 auto;padding:34px clamp(24px, 6.25vw, 80px) 40px;box-sizing:border-box}
+.grid[data-cols="4"]{grid-template-columns:repeat(4,1fr);gap:32px}
 .col{display:flex;flex-direction:column;gap:18px;min-width:0}
 .head{display:flex;flex-direction:column;gap:7px}
 .head-row{display:flex;align-items:center;gap:8px}
