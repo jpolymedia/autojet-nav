@@ -339,6 +339,8 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .field input{order:1;font-size:14px}
 .field input::placeholder{color:#8A9099}
 .field input{border:0;outline:0;width:100%;font:400 14px/1 'Wix Madefor Text',sans-serif;color:#333;background:none}
+/* 16px on touch screens: iOS zooms the page when a focused input is smaller */
+@media (pointer:coarse){.field input{font-size:16px}}
 .field input::placeholder{color:#8A9099}
 .quote{display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:140px;height:36px;background:#FBBF13;border-radius:2px;font-family:'Wix Madefor Text',sans-serif;font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:#1A1A1A}
 .quote:hover{background:#e6ad0c;color:#1A1A1A}
@@ -356,6 +358,8 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .sname{font-size:13px;font-weight:600;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .smeta{display:flex;align-items:center;gap:6px;font-size:12px;color:#5A6069;white-space:nowrap;overflow:hidden}
 .spn{font-weight:700;color:#056EB7;flex:0 0 auto}
+.sdesc{font-size:12px;color:#5A6069;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ssec{flex:0 0 auto;font-weight:700;font-size:11px;line-height:17px;color:#fff;background:#333;border-radius:3px;padding:0 6px}
 .sbrand{flex:0 0 auto;padding:1px 6px;border-radius:999px;background:#F4F6F8;border:1px solid #E4E7EB;font-size:11px;color:#5A6069;white-space:nowrap}
 .sall{display:block;padding:10px 12px;font-weight:700;font-size:13px;color:#056EB7;background:#F4F6F8;text-align:center;border-top:1px solid #E4E7EB}
 .sall:hover{background:#E8F2FB}
@@ -396,7 +400,7 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .sheet-x{display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin-right:-10px}
 .sheet-search{padding:12px clamp(20px, 6.25vw, 80px);flex:0 0 auto;box-sizing:border-box}
 .sheet-search .field{width:100%;max-width:none;height:46px}
-.sheet-search input{font-size:14px}
+.sheet-search input{font-size:16px}
 .tree{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;border-top:1px solid #EDEFF2}
 .trow{display:flex;align-items:center;justify-content:space-between;width:100%;height:52px;padding:0 clamp(20px, 6.25vw, 80px);border-bottom:1px solid #EDEFF2;font-weight:400;font-size:14px;color:#333;text-align:left;box-sizing:border-box}
 .trow .tname{display:flex;align-items:center;flex:1 1 auto;height:100%;color:inherit}
@@ -507,14 +511,19 @@ function treeHTML(phone) {
  * doesn't need). Row shape from /_functions/catalog's r[] (see get_catalog in
  * backend/http-functions.js): r[0] autoJetPart, r[1] oe (pipe-delimited),
  * r[4] partTypeStandardized, r[8] hasImage (1/0), r[9] imgUrl,
- * r[11] canonBrands (pipe-delimited). */
-const AJNAV_CACHE_KEY = 'ajNavCat2';
+ * r[11] canonBrands (pipe-delimited), r[15] description, r[16] print catalog
+ * section (BB 6, FRL 16). */
+const AJNAV_CACHE_KEY = 'ajNavCat3';
 const AJNAV_MAX = 8;
 const AJNAV_FALLBACK_IMG = 'https://static.wixstatic.com/media/3978df_4493127c97a84b909579252160cdbfc2~mv2.jpg';
 
 let AJNAV_DATA = null, AJNAV_LOADING = false, AJNAV_WAITERS = [];
 
 const ajnNorm = s => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+/* Like ajnNorm, but drops leading zeros inside each dash/space group, so 26374-12 finds 04-26374-012.
+ * Same rule as normz/zq in autojet-search.js. */
+const ajnNormz = s => (s || '').toString().toLowerCase().split(/[^a-z0-9]+/).map(g => g.replace(/^0+(?=[0-9])/, '')).join('');
+const ajnZq = q => { const z = ajnNormz(q); if (!/[0-9]/.test(z)) return ''; const grouped = /[a-z0-9][^a-z0-9]+[a-z0-9]/i.test((q || '').trim()); return z.length >= (grouped ? 5 : 6) ? z : ''; };
 
 function ajnParse(slim) {
   return slim.map(r => {
@@ -524,10 +533,13 @@ function ajnParse(slim) {
     const brand = (r[3] || '').split('|').filter(Boolean)[0] || '';
     const hasImage = !!r[4];
     const img = r[5] || '';
+    const desc = r[6] || '';
+    const section = r[7] || '';
     return {
-      part, oeList: oe, partType, brand, hasImage, img,
+      part, oeList: oe, partType, brand, hasImage, img, desc, section,
       _np: ajnNorm(part),
       _noe: oe.map(ajnNorm),
+      _noz: oe.map(ajnNormz),
       _nkw: ajnNorm(partType + brand)
     };
   });
@@ -556,7 +568,7 @@ function ajnLoad(cb) {
   fetch('/_functions/catalog')
     .then(r => r.json())
     .then(d => {
-      const slim = (d.parts || []).map(r => [r[0] || '', r[1] || '', r[4] || '', r[11] || '', r[8] || 0, r[9] || '']);
+      const slim = (d.parts || []).map(r => [r[0] || '', r[1] || '', r[4] || '', r[11] || '', r[8] || 0, r[9] || '', r[15] || '', r[16] || '']);
       const parsed = ajnParse(slim);
       try { sessionStorage.setItem(AJNAV_CACHE_KEY, JSON.stringify(parsed)); } catch (e) { /* storage unavailable or full */ }
       finish(parsed);
@@ -584,6 +596,8 @@ function ajnSuggest(data, q) {
   if (add(data.filter(p => p._np.startsWith(nq)))) return out;
   if (add(data.filter(p => p._np.includes(nq)))) return out;
   if (add(data.filter(p => p._noe.some(o => o.includes(nq))))) return out;
+  const nz = ajnZq(q);
+  if (nz && add(data.filter(p => (p._noz || []).some(o => o.includes(nz))))) return out;
   add(data.filter(p => p._nkw.includes(nq)));
   return out;
 }
@@ -594,7 +608,8 @@ function ajnRowHTML(p) {
     <div class="sthumb"><img src="${esc(img)}" alt="" loading="lazy"></div>
     <div class="sbody">
       <span class="sname">${esc(p.partType || 'Part')}</span>
-      <span class="smeta"><span class="spn">${esc(p.part)}</span>${p.brand ? `<span class="sbrand">${esc(p.brand)}</span>` : ''}</span>
+      ${p.desc ? `<span class="sdesc">${esc(p.desc)}</span>` : ''}
+      <span class="smeta"><span class="spn">${esc(p.part)}</span>${p.section ? `<span class="ssec">${esc(p.section)}</span>` : ''}${p.brand ? `<span class="sbrand">${esc(p.brand)}</span>` : ''}</span>
     </div>
   </div>`;
 }
