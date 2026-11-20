@@ -436,6 +436,9 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .tsub .tlabel:not(:first-child){margin-top:6px}
 .tlink{display:flex;align-items:center;gap:9px;min-height:22px;line-height:1.35;font-size:14px;color:#333}
 .tlink[data-bold]{font-weight:700}
+/* 2026-11-20: web-page rows in a catalogs group match the desktop menu, arrow in front, blue. */
+.tlink[data-out]{color:#056EB7;font-weight:600}
+.tlink svg{flex:0 0 auto}
 .sheet-foot{flex:0 0 auto;padding:20px clamp(20px, 6.25vw, 80px) 24px;box-sizing:border-box}
 .sheet-foot .quote{width:100%;justify-content:center;height:50px;font-size:14px}
 .tel{display:flex;align-items:center;justify-content:center;margin:16px 0 0}
@@ -509,7 +512,7 @@ function treeHTML(phone) {
     if (entry.type === 'mega') {
       groups = entry.columns.map(c =>
         `<p class="tlabel">${esc(c.heading)}</p>` +
-        c.items.map(it => `<a class="tlink"${it.bold ? ' data-bold' : ''} href="${esc(it.href)}"${it.pdf ? ' target="_blank" rel="noopener"' : ''}>${it.pdf ? ICON.docSmall : ''}${esc(it.label)}</a>`).join('')
+        c.items.map(it => `<a class="tlink"${it.bold ? ' data-bold' : ''}${it.arrow ? ' data-out' : ''} href="${esc(it.href)}"${it.pdf ? ' target="_blank" rel="noopener"' : ''}>${it.pdf ? ICON.docSmall : (it.arrow ? ICON.arrow : '')}${esc(it.label)}</a>`).join('')
       ).join('');
     } else {
       groups = entry.items.map(it =>
