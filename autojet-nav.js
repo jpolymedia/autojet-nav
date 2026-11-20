@@ -133,36 +133,19 @@ const NAV = [
     label: 'School Bus', href: '/school-bus', type: 'mega',
     columns: [
       {
-        heading: 'Download PDF Catalogs', secondary: true,
+        // 2026-11-20: each section name goes to its catalog pages index. The section PDF is a button on that index page.
+        heading: 'Catalog Pages',
         items: [
-          { label: 'School Bus Catalog', href: 'https://www.auto-jet.com/_files/ugd/3978df_c9854d9dabef456581bb3f5983c4488e.pdf?index=true', bold: true, pdf: true },
-          { label: 'Accessories', href: 'https://www.auto-jet.com/_files/ugd/3978df_96b767f23abd4dff8626aafe0a7961d6.pdf?index=true', pdf: true },
-          // 2026-11-20: web index of the Accessories catalog pages (one page per printed page, ACC 1 to ACC 17).
-          { label: 'Accessories Catalog Pages', href: '/catalog-pages/accessories', arrow: true },
-          { label: 'Blue Bird', href: 'https://www.auto-jet.com/_files/ugd/3978df_6dbdead6404145cebe986f8287086671.pdf?index=true', pdf: true },
-          // 2026-11-19: web index of the Blue Bird catalog pages (one page per printed page, BB 1 to BB 43).
-          { label: 'Blue Bird Catalog Pages', href: '/catalog-pages/blue-bird', arrow: true },
-          { label: 'Chevrolet-GMC', href: 'https://www.auto-jet.com/_files/ugd/3978df_bf3f5d93eb0448f9a509b62589ec7830.pdf?index=true', pdf: true },
-          // 2026-11-20: web index of the Chevrolet-GMC catalog pages (one page per printed page, GM 1 to GM 14).
-          { label: 'Chevrolet-GMC Catalog Pages', href: '/catalog-pages/chevrolet-gmc', arrow: true },
-          { label: 'Converters & Mufflers', href: 'https://www.auto-jet.com/_files/ugd/3978df_843d7ab810c049db92382bd066e7f01e.pdf?index=true', pdf: true },
-          // 2026-11-20: web index of the Converters & Mufflers catalog pages (one page per printed page, CAT/MUF 1 to CAT/MUF 15).
-          { label: 'Converters & Mufflers Catalog Pages', href: '/catalog-pages/converters-mufflers', arrow: true },
-          { label: 'DPF', href: 'https://www.auto-jet.com/_files/ugd/3978df_8db1639b462b4ef5b34ddcc5a49b39c6.pdf?index=true', pdf: true },
-          // 2026-11-20: web index of the DPF catalog pages (one page per printed page, DPF 2 to DPF 17).
-          { label: 'DPF Catalog Pages', href: '/catalog-pages/dpf', arrow: true },
-          { label: 'Ford', href: 'https://www.auto-jet.com/_files/ugd/3978df_26970388efc04bba8c3c252909f97c0d.pdf?index=true', pdf: true },
-          // 2026-11-20: web index of the Ford catalog pages (one page per printed page, FORD 1 to FORD 5).
-          { label: 'Ford Catalog Pages', href: '/catalog-pages/ford', arrow: true },
-          { label: 'Freightliner', href: 'https://www.auto-jet.com/_files/ugd/3978df_c4a92aacb83e4c07979ca0ffd8f248eb.pdf?index=true', pdf: true },
-          // 2026-11-20: web index of the Freightliner catalog pages (one page per printed page, FRL 1 to FRL 33).
-          { label: 'Freightliner Catalog Pages', href: '/catalog-pages/freightliner', arrow: true },
-          { label: 'Navistar International', href: 'https://www.auto-jet.com/_files/ugd/3978df_57f0cde034894b7a943d42cbd848ef28.pdf', pdf: true },
-          // 2026-11-20: web index of the Navistar International catalog pages (one page per printed page, NAV 1A to NAV 25).
-          { label: 'Navistar International Catalog Pages', href: '/catalog-pages/navistar-international', arrow: true },
-          { label: 'Thomas Built', href: 'https://www.auto-jet.com/_files/ugd/3978df_d1256cdb76ef4885b34d5f3d49332a4c.pdf?index=true', pdf: true },
-          // 2026-11-20: web index of the Thomas Built catalog pages (one page per printed page, T 1 to T 38).
-          { label: 'Thomas Built Catalog Pages', href: '/catalog-pages/thomas-built', arrow: true }
+          { label: 'Accessories', href: '/catalog-pages/accessories' },
+          { label: 'Blue Bird', href: '/catalog-pages/blue-bird' },
+          { label: 'Chevrolet-GMC', href: '/catalog-pages/chevrolet-gmc' },
+          { label: 'Converters & Mufflers', href: '/catalog-pages/converters-mufflers' },
+          { label: 'DPF', href: '/catalog-pages/dpf' },
+          { label: 'Ford', href: '/catalog-pages/ford' },
+          { label: 'Freightliner', href: '/catalog-pages/freightliner' },
+          { label: 'Navistar International', href: '/catalog-pages/navistar-international' },
+          { label: 'Thomas Built', href: '/catalog-pages/thomas-built' },
+          { label: 'Complete School Bus Catalog (PDF)', href: 'https://www.auto-jet.com/_files/ugd/3978df_c9854d9dabef456581bb3f5983c4488e.pdf?index=true', bold: true, pdf: true }
         ]
       },
       {
