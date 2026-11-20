@@ -457,6 +457,8 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .sheet-foot .quote{width:100%;justify-content:center;height:50px;font-size:14px}
 .tel{display:flex;align-items:center;justify-content:center;margin:16px 0 0}
 .tel a{font-size:20px;color:#056EB7}
+/* 2026-11-20: short screens (phone held sideways). The bar, search, and footer used all the height and left the link list none, so the whole sheet scrolls as one piece. */
+@media (max-height:500px){.sheet[open]{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch}.tree{overflow:visible}}
 
 :host([data-compact]) .util-right .status{display:none}
 
