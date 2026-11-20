@@ -143,11 +143,17 @@ const NAV = [
           // 2026-11-19: web index of the Blue Bird catalog pages (one page per printed page, BB 1 to BB 43).
           { label: 'Blue Bird Catalog Pages', href: '/catalog-pages/blue-bird', arrow: true },
           { label: 'Chevrolet-GMC', href: 'https://www.auto-jet.com/_files/ugd/3978df_bf3f5d93eb0448f9a509b62589ec7830.pdf?index=true', pdf: true },
+          // 2026-11-20: web index of the Chevrolet-GMC catalog pages (one page per printed page, GM 1 to GM 14).
+          { label: 'Chevrolet-GMC Catalog Pages', href: '/catalog-pages/chevrolet-gmc', arrow: true },
           { label: 'Converters & Mufflers', href: 'https://www.auto-jet.com/_files/ugd/3978df_843d7ab810c049db92382bd066e7f01e.pdf?index=true', pdf: true },
+          // 2026-11-20: web index of the Converters & Mufflers catalog pages (one page per printed page, CAT/MUF 1 to CAT/MUF 15).
+          { label: 'Converters & Mufflers Catalog Pages', href: '/catalog-pages/converters-mufflers', arrow: true },
           { label: 'DPF', href: 'https://www.auto-jet.com/_files/ugd/3978df_8db1639b462b4ef5b34ddcc5a49b39c6.pdf?index=true', pdf: true },
           // 2026-11-20: web index of the DPF catalog pages (one page per printed page, DPF 2 to DPF 17).
           { label: 'DPF Catalog Pages', href: '/catalog-pages/dpf', arrow: true },
           { label: 'Ford', href: 'https://www.auto-jet.com/_files/ugd/3978df_26970388efc04bba8c3c252909f97c0d.pdf?index=true', pdf: true },
+          // 2026-11-20: web index of the Ford catalog pages (one page per printed page, FORD 1 to FORD 5).
+          { label: 'Ford Catalog Pages', href: '/catalog-pages/ford', arrow: true },
           { label: 'Freightliner', href: 'https://www.auto-jet.com/_files/ugd/3978df_c4a92aacb83e4c07979ca0ffd8f248eb.pdf?index=true', pdf: true },
           // 2026-11-20: web index of the Freightliner catalog pages (one page per printed page, FRL 1 to FRL 33).
           { label: 'Freightliner Catalog Pages', href: '/catalog-pages/freightliner', arrow: true },
