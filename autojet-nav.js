@@ -148,6 +148,8 @@ const NAV = [
           // 2026-11-20: web index of the Freightliner catalog pages (one page per printed page, FRL 1 to FRL 33).
           { label: 'Freightliner Catalog Pages', href: '/catalog-pages/freightliner', arrow: true },
           { label: 'Navistar International', href: 'https://www.auto-jet.com/_files/ugd/3978df_57f0cde034894b7a943d42cbd848ef28.pdf', pdf: true },
+          // 2026-11-20: web index of the Navistar International catalog pages (one page per printed page, NAV 1A to NAV 25).
+          { label: 'Navistar International Catalog Pages', href: '/catalog-pages/navistar-international', arrow: true },
           { label: 'Thomas Built', href: 'https://www.auto-jet.com/_files/ugd/3978df_d1256cdb76ef4885b34d5f3d49332a4c.pdf?index=true', pdf: true },
           // 2026-11-20: web index of the Thomas Built catalog pages (one page per printed page, T 1 to T 38).
           { label: 'Thomas Built Catalog Pages', href: '/catalog-pages/thomas-built', arrow: true }
