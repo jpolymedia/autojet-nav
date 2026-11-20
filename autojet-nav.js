@@ -137,6 +137,8 @@ const NAV = [
         items: [
           { label: 'School Bus Catalog', href: 'https://www.auto-jet.com/_files/ugd/3978df_c9854d9dabef456581bb3f5983c4488e.pdf?index=true', bold: true, pdf: true },
           { label: 'Accessories', href: 'https://www.auto-jet.com/_files/ugd/3978df_96b767f23abd4dff8626aafe0a7961d6.pdf?index=true', pdf: true },
+          // 2026-11-20: web index of the Accessories catalog pages (one page per printed page, ACC 1 to ACC 17).
+          { label: 'Accessories Catalog Pages', href: '/catalog-pages/accessories', arrow: true },
           { label: 'Blue Bird', href: 'https://www.auto-jet.com/_files/ugd/3978df_6dbdead6404145cebe986f8287086671.pdf?index=true', pdf: true },
           // 2026-11-19: web index of the Blue Bird catalog pages (one page per printed page, BB 1 to BB 43).
           { label: 'Blue Bird Catalog Pages', href: '/catalog-pages/blue-bird', arrow: true },
