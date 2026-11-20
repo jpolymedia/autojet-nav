@@ -189,9 +189,9 @@ const NAV = [
     columns: [
       {
         // 2026-11-20: heading matches School Bus. Rows follow the Truck catalog's printed table of contents order.
-        heading: 'Catalog', secondary: true,
+        heading: 'Catalog',
         items: [
-          { label: 'Truck Catalog', href: 'https://www.auto-jet.com/_files/ugd/3978df_121a7e754f2448c2b031c6caedb82b2e.pdf?index=true', bold: true, pdf: true },
+          { label: 'Complete Truck Catalog (PDF)', href: 'https://www.auto-jet.com/_files/ugd/3978df_121a7e754f2448c2b031c6caedb82b2e.pdf?index=true', bold: true, pdf: true },
           { label: 'Accessories', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_872c682e617749b0870031c4fd48148a.pdf', pdf: true },
           { label: 'Mufflers', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_3fac61dde47b4087b4223bf8bfc94a53.pdf', pdf: true },
           { label: 'Emission Control', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_84358508fd8e41f1bcc146eba4a33f0f.pdf', pdf: true },
@@ -381,6 +381,9 @@ button{font-family:inherit;border:0;background:none;padding:0;cursor:pointer}
 .sall{display:block;padding:10px 12px;font-weight:700;font-size:13px;color:#056EB7;background:#F4F6F8;text-align:center;border-top:1px solid #E4E7EB}
 .sall:hover{background:#E8F2FB}
 .snone{padding:12px;font-size:12.5px;color:#5A6069}
+.syrow{display:flex;align-items:center;gap:10px;padding:8px 12px;color:#333;border-bottom:1px solid #F1F3F5;text-decoration:none}
+.syrow:hover{background:#F4F6F8}
+.stag{flex:0 0 auto;font-weight:700;font-size:11px;line-height:15px;color:#056EB7;border:1px solid #056EB7;border-radius:3px;padding:0 6px}
 
 /* panels */
 .panel{position:absolute;left:0;right:0;top:100%;background:#fff;box-shadow:0 10px 18px -12px rgba(0,0,0,.14);display:none;z-index:1}
@@ -536,7 +539,10 @@ function treeHTML(phone) {
  * r[4] partTypeStandardized, r[8] hasImage (1/0), r[9] imgUrl,
  * r[11] canonBrands (pipe-delimited), r[15] description, r[16] print catalog
  * section (BB 6, FRL 16). */
-const AJNAV_CACHE_KEY = 'ajNavCat3';
+const AJNAV_CACHE_KEY = 'ajNavCat4';
+const AJNAV_SYS_KEY = 'ajNavSys1';
+const AJNAV_SYS_MAX = 3;
+let AJNAV_SYS = [];
 const AJNAV_MAX = 8;
 const AJNAV_FALLBACK_IMG = 'https://static.wixstatic.com/media/3978df_4493127c97a84b909579252160cdbfc2~mv2.jpg';
 
@@ -563,7 +569,8 @@ function ajnParse(slim) {
       _np: ajnNorm(part),
       _noe: oe.map(ajnNorm),
       _noz: oe.map(ajnNormz),
-      _nkw: ajnNorm(partType + brand)
+      _nkw: ajnNorm(partType + brand),
+      _txt: (partType + ' ' + brand + ' ' + desc).toLowerCase()
     };
   });
 }
@@ -585,7 +592,11 @@ function ajnLoad(cb) {
   let cached = null;
   try { cached = sessionStorage.getItem(AJNAV_CACHE_KEY); } catch (e) { /* storage unavailable */ }
   if (cached) {
-    try { finish(JSON.parse(cached)); return; } catch (e) { /* fall through to fetch */ }
+    try {
+      const parsedCache = JSON.parse(cached);
+      try { AJNAV_SYS = JSON.parse(sessionStorage.getItem(AJNAV_SYS_KEY) || '[]'); } catch (e2) { AJNAV_SYS = []; }
+      finish(parsedCache); return;
+    } catch (e) { /* fall through to fetch */ }
   }
 
   fetch('/_functions/catalog')
@@ -593,6 +604,9 @@ function ajnLoad(cb) {
     .then(d => {
       const slim = (d.parts || []).map(r => [r[0] || '', r[1] || '', r[4] || '', r[11] || '', r[8] || 0, r[9] || '', r[15] || '', r[16] || '']);
       const parsed = ajnParse(slim);
+      // 2026-11-20: systems from the same feed, so a model word like Vision finds its systems.
+      AJNAV_SYS = (d.systems || []).map(x => ({ title: x.title || '', page: x.page || '', fit: [x.engine, x.year].filter(Boolean).join(', '), _txt: [x.title, x.make, x.engine, x.year, x.page].join(' ').toLowerCase() }));
+      try { sessionStorage.setItem(AJNAV_SYS_KEY, JSON.stringify(AJNAV_SYS)); } catch (e) { /* storage unavailable or full */ }
       try { sessionStorage.setItem(AJNAV_CACHE_KEY, JSON.stringify(parsed)); } catch (e) { /* storage unavailable or full */ }
       finish(parsed);
     })
@@ -621,8 +635,28 @@ function ajnSuggest(data, q) {
   if (add(data.filter(p => p._noe.some(o => o.includes(nq))))) return out;
   const nz = ajnZq(q);
   if (nz && add(data.filter(p => (p._noz || []).some(o => o.includes(nz))))) return out;
-  add(data.filter(p => p._nkw.includes(nq)));
+  if (add(data.filter(p => p._nkw.includes(nq)))) return out;
+  // 2026-11-20: last tier, every typed word found in the part type, brand, or description (so Vision finds parts described for the Vision).
+  const toks = ajnToks(q);
+  if (toks.length) add(data.filter(p => toks.every(t => (p._txt || '').includes(t))));
   return out;
+}
+
+const ajnToks = q => (q || '').toString().toLowerCase().split(/[^a-z0-9.]+/).filter(t => t.length >= 2);
+
+function ajnSysSuggest(q) {
+  const toks = ajnToks(q);
+  if (!toks.length) return [];
+  return AJNAV_SYS.filter(x => toks.every(t => x._txt.includes(t))).slice(0, AJNAV_SYS_MAX);
+}
+
+function ajnSysRowHTML(x, href) {
+  return `<a class="syrow" href="${esc(href)}">
+    <div class="sbody">
+      <span class="sname">${esc(x.title)}</span>
+      <span class="smeta"><span class="stag">System</span>${x.page ? `<span class="ssec">${esc(x.page)}</span>` : ''}${x.fit ? `<span>${esc(x.fit)}</span>` : ''}</span>
+    </div>
+  </a>`;
 }
 
 function ajnRowHTML(p) {
@@ -1017,13 +1051,15 @@ class AutojetNav extends HTMLElement {
     const render = q => {
       ajnLoad(data => {
         const results = ajnSuggest(data, q);
+        const allHref = `${action()}?q=${encodeURIComponent(q)}`;
+        const sysHTML = ajnSysSuggest(q).map(x => ajnSysRowHTML(x, allHref)).join('');
         hi = -1;
-        if (!results.length) {
+        if (!results.length && !sysHTML) {
           dd.innerHTML = `<div class="snone">No matches. Press Enter to search all parts for "${esc(q)}".</div>`;
           dd.setAttribute('data-open', '');
           return;
         }
-        dd.innerHTML = results.map(ajnRowHTML).join('')
+        dd.innerHTML = sysHTML + results.map(ajnRowHTML).join('')
           + `<a class="sall" data-see-all href="${esc(action())}?q=${encodeURIComponent(q)}">See all results for "${esc(q)}"</a>`;
         dd.setAttribute('data-open', '');
         dd.querySelectorAll('.srow').forEach(row => {
