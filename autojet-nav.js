@@ -145,6 +145,8 @@ const NAV = [
           { label: 'DPF', href: 'https://www.auto-jet.com/_files/ugd/3978df_8db1639b462b4ef5b34ddcc5a49b39c6.pdf?index=true', pdf: true },
           { label: 'Ford', href: 'https://www.auto-jet.com/_files/ugd/3978df_26970388efc04bba8c3c252909f97c0d.pdf?index=true', pdf: true },
           { label: 'Freightliner', href: 'https://www.auto-jet.com/_files/ugd/3978df_c4a92aacb83e4c07979ca0ffd8f248eb.pdf?index=true', pdf: true },
+          // 2026-11-20: web index of the Freightliner catalog pages (one page per printed page, FRL 1 to FRL 33).
+          { label: 'Freightliner Catalog Pages', href: '/catalog-pages/freightliner', arrow: true },
           { label: 'Navistar International', href: 'https://www.auto-jet.com/_files/ugd/3978df_57f0cde034894b7a943d42cbd848ef28.pdf', pdf: true },
           { label: 'Thomas Built', href: 'https://www.auto-jet.com/_files/ugd/3978df_d1256cdb76ef4885b34d5f3d49332a4c.pdf?index=true', pdf: true },
           // 2026-11-20: web index of the Thomas Built catalog pages (one page per printed page, T 1 to T 38).
