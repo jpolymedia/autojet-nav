@@ -268,7 +268,8 @@ const NAV = [
     label: 'Resources', type: 'dropdown', noLink: true, width: 280,
     items: [
       { label: 'Blog', href: '/resources' },
-      { label: 'FAQ', href: '/faq' }
+      { label: 'FAQ', href: '/faq' },
+      { label: 'Technical Resources', href: '/technical-resources' }
     ]
   },
 
