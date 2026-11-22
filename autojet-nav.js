@@ -254,6 +254,8 @@ const NAV = [
     label: 'Off-Road', href: '/off-road', type: 'dropdown', width: 280,
     items: [
       { label: 'Off-Road Catalog', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_00c86f15b08f494e8daacf08277a36c4.pdf', pdf: true, bold: true },
+      // 2026-11-21: catalog pages index (17 printed pages as web pages), under the PDF.
+      { label: 'Off-Road Catalog Pages', href: '/catalog-pages/off-road' },
       { label: 'Exhaust Gas Purifiers', href: '/exhaust-gas-purifiers' }
     ]
   },
