@@ -189,18 +189,19 @@ const NAV = [
     columns: [
       {
         // 2026-11-20: heading matches School Bus. Rows follow the Truck catalog's printed table of contents order.
+        // 2026-11-21: the nine section rows link to their catalog pages index (was each section PDF). The complete catalog stays a PDF.
         heading: 'Catalog',
         items: [
           { label: 'Complete Truck Catalog (PDF)', href: 'https://www.auto-jet.com/_files/ugd/3978df_121a7e754f2448c2b031c6caedb82b2e.pdf?index=true', bold: true, pdf: true },
-          { label: 'Accessories', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_872c682e617749b0870031c4fd48148a.pdf', pdf: true },
-          { label: 'Mufflers', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_3fac61dde47b4087b4223bf8bfc94a53.pdf', pdf: true },
-          { label: 'Emission Control', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_84358508fd8e41f1bcc146eba4a33f0f.pdf', pdf: true },
-          { label: 'Navistar International', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_aff7fd91fee341e992c6bb99d53d2d4b.pdf', pdf: true },
-          { label: 'Freightliner', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_33525896d14940349da522216a8e8536.pdf', pdf: true },
-          { label: 'Ford', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_a2a9e1966089407896bcb941a8cd7320.pdf', pdf: true },
-          { label: 'Chevrolet-GMC', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_1199d42a933d44eca1c6d0098e7ddf6d.pdf', pdf: true },
-          { label: 'Performance', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_1a36d6e3b86b4e5c847456bf19688c06.pdf', pdf: true },
-          { label: 'Crossover', href: 'https://f6ae10c3-cc7d-49f5-9cfb-e003058ae4c4.usrfiles.com/ugd/3978df_3273b0cda0dc47caa0b91a58d58929dd.pdf', pdf: true },
+          { label: 'Accessories', href: '/catalog-pages/truck-accessories' },
+          { label: 'Mufflers', href: '/catalog-pages/truck-mufflers' },
+          { label: 'Emission Control', href: '/catalog-pages/truck-emission-control' },
+          { label: 'Navistar International', href: '/catalog-pages/truck-navistar-international' },
+          { label: 'Freightliner', href: '/catalog-pages/truck-freightliner' },
+          { label: 'Ford', href: '/catalog-pages/truck-ford' },
+          { label: 'Chevrolet-GMC', href: '/catalog-pages/truck-chevrolet-gmc' },
+          { label: 'Performance', href: '/catalog-pages/truck-performance' },
+          { label: 'Crossover', href: '/catalog-pages/truck-crossover' },
           { label: 'Vintage & Discontinued', href: '/vintage-and-discontinued', pdf: true }
         ]
       },
