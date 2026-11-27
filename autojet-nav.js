@@ -202,7 +202,7 @@ const NAV = [
           { label: 'Chevrolet-GMC', href: '/catalog-pages/truck-chevrolet-gmc' },
           { label: 'Performance', href: '/catalog-pages/truck-performance' },
           { label: 'Crossover', href: '/catalog-pages/truck-crossover' },
-          { label: 'Vintage & Discontinued', href: '/vintage-and-discontinued', pdf: true }
+          { label: 'Vintage & Discontinued', href: '/vintage-parts' }
         ]
       },
       {
